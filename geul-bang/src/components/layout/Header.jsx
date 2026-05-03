@@ -10,7 +10,7 @@ const header = css({
   background: 'token(colors.bg)',
   borderBottom: '1px solid token(colors.border)',
   transition: 'transform 0.3s ease',
-  padding: '0 20px',
+  padding: { base: '0 16px', sm: '0 20px' },
   height: '56px',
   display: 'flex',
   alignItems: 'center',

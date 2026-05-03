@@ -37,6 +37,7 @@ const backBtn = css({
   color: 'token(colors.text.muted)',
   padding: '4px 8px',
   borderRadius: '6px',
+  flexShrink: 0,
   _hover: { background: 'token(colors.bg.subtle)' },
 })
 
@@ -54,7 +55,7 @@ const titleText = css({
 const content = css({
   maxWidth: '680px',
   margin: '0 auto',
-  padding: '88px 24px 80px',
+  padding: { base: '76px 16px 60px', sm: '88px 24px 80px' },
   lineHeight: '1.9',
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-all',

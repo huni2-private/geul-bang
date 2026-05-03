@@ -14,15 +14,16 @@ const toggleBtn = css({
 
 const panel = css({
   position: 'fixed',
-  bottom: '24px',
-  right: '24px',
+  bottom: { base: '0', sm: '24px' },
+  right: { base: '0', sm: '24px' },
+  left: { base: '0', sm: 'auto' },
   background: 'token(colors.bg.card)',
   border: '1px solid token(colors.border)',
-  borderRadius: '12px',
+  borderRadius: { base: '12px 12px 0 0', sm: '12px' },
   padding: '20px',
   boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
   zIndex: 200,
-  minWidth: '240px',
+  minWidth: { base: 'auto', sm: '240px' },
 })
 
 const panelHeader = css({

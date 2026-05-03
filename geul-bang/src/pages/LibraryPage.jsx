@@ -15,7 +15,7 @@ const wrap = css({
 const inner = css({
   maxWidth: '680px',
   margin: '0 auto',
-  padding: '32px 20px',
+  padding: { base: '24px 16px', sm: '32px 20px' },
 })
 
 const topRow = css({
@@ -23,10 +23,12 @@ const topRow = css({
   justifyContent: 'space-between',
   alignItems: 'center',
   marginBottom: '24px',
+  gap: '12px',
+  flexWrap: 'wrap',
 })
 
 const heading = css({
-  fontSize: '22px',
+  fontSize: { base: '18px', sm: '22px' },
   fontWeight: '700',
   color: 'token(colors.text)',
 })
