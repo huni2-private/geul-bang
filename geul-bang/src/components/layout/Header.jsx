@@ -7,8 +7,8 @@ const header = css({
   left: 0,
   right: 0,
   zIndex: 100,
-  background: 'token(colors.bg.DEFAULT)',
-  borderBottom: '1px solid token(colors.border.DEFAULT)',
+  background: 'token(colors.bg)',
+  borderBottom: '1px solid token(colors.border)',
   transition: 'transform 0.3s ease',
   padding: '0 20px',
   height: '56px',
@@ -22,7 +22,7 @@ const hidden = css({ transform: 'translateY(-100%)' })
 const logo = css({
   fontSize: '20px',
   fontWeight: '700',
-  color: 'token(colors.text.DEFAULT)',
+  color: 'token(colors.text)',
   textDecoration: 'none',
   letterSpacing: '-0.5px',
 })

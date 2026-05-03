@@ -8,7 +8,7 @@ const btn = css({
   gap: '6px',
   padding: '10px 20px',
   borderRadius: '8px',
-  background: 'token(colors.accent.DEFAULT)',
+  background: 'token(colors.accent)',
   color: '#fff',
   fontSize: '14px',
   fontWeight: '600',

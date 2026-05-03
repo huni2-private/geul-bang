@@ -17,7 +17,7 @@ const panel = css({
   bottom: '24px',
   right: '24px',
   background: 'token(colors.bg.card)',
-  border: '1px solid token(colors.border.DEFAULT)',
+  border: '1px solid token(colors.border)',
   borderRadius: '12px',
   padding: '20px',
   boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
@@ -32,7 +32,7 @@ const panelHeader = css({
   marginBottom: '16px',
   fontSize: '14px',
   fontWeight: '600',
-  color: 'token(colors.text.DEFAULT)',
+  color: 'token(colors.text)',
 })
 
 const section = css({ marginBottom: '16px' })
@@ -48,15 +48,15 @@ const sizeBtn = css({
   width: '32px',
   height: '32px',
   borderRadius: '6px',
-  border: '1px solid token(colors.border.DEFAULT)',
+  border: '1px solid token(colors.border)',
   background: 'token(colors.bg.subtle)',
   cursor: 'pointer',
   fontSize: '16px',
-  color: 'token(colors.text.DEFAULT)',
-  _hover: { background: 'token(colors.border.DEFAULT)' },
+  color: 'token(colors.text)',
+  _hover: { background: 'token(colors.border)' },
 })
 
-const sizeVal = css({ fontSize: '14px', color: 'token(colors.text.DEFAULT)', minWidth: '32px', textAlign: 'center' })
+const sizeVal = css({ fontSize: '14px', color: 'token(colors.text)', minWidth: '32px', textAlign: 'center' })
 
 const themeRow = css({ display: 'flex', gap: '8px' })
 
@@ -64,7 +64,7 @@ const themeBtn = css({
   flex: 1,
   padding: '6px',
   borderRadius: '6px',
-  border: '1px solid token(colors.border.DEFAULT)',
+  border: '1px solid token(colors.border)',
   cursor: 'pointer',
   fontSize: '12px',
   transition: 'all 0.15s',

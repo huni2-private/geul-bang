@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext'
 const wrap = css({
   paddingTop: '56px',
   minHeight: '100svh',
-  background: 'token(colors.bg.DEFAULT)',
+  background: 'token(colors.bg)',
 })
 
 const inner = css({
@@ -28,7 +28,7 @@ const topRow = css({
 const heading = css({
   fontSize: '22px',
   fontWeight: '700',
-  color: 'token(colors.text.DEFAULT)',
+  color: 'token(colors.text)',
 })
 
 const grid = css({

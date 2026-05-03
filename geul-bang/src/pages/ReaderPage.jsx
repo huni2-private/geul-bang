@@ -43,7 +43,7 @@ const backBtn = css({
 const titleText = css({
   fontSize: '15px',
   fontWeight: '600',
-  color: 'token(colors.text.DEFAULT)',
+  color: 'token(colors.text)',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',

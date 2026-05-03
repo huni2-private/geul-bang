@@ -4,7 +4,7 @@ import { Trash2 } from 'lucide-react'
 
 const card = css({
   background: 'token(colors.bg.card)',
-  border: '1px solid token(colors.border.DEFAULT)',
+  border: '1px solid token(colors.border)',
   borderRadius: '10px',
   padding: '16px',
   cursor: 'pointer',
@@ -23,7 +23,7 @@ const titleRow = css({
 const title = css({
   fontSize: '16px',
   fontWeight: '600',
-  color: 'token(colors.text.DEFAULT)',
+  color: 'token(colors.text)',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
@@ -37,7 +37,7 @@ const meta = css({
 })
 
 const barWrap = css({
-  background: 'token(colors.border.DEFAULT)',
+  background: 'token(colors.border)',
   borderRadius: '99px',
   height: '6px',
   overflow: 'hidden',
@@ -45,7 +45,7 @@ const barWrap = css({
 
 const bar = css({
   height: '100%',
-  background: 'token(colors.accent.DEFAULT)',
+  background: 'token(colors.accent)',
   borderRadius: '99px',
   transition: 'width 0.3s ease',
 })
