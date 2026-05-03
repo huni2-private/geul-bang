@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+geul-bang/dist/
+geul-bang/styled-system/
+
+# Environment variables
+geul-bang/.env
+geul-bang/.env.local
+geul-bang/.env.*.local
+
+# Firebase
+.firebase/
+*-adminsdk-*.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/

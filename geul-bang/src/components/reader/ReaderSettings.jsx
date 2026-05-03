@@ -1,0 +1,128 @@
+import { css } from 'styled-system/css'
+import { Settings, X } from 'lucide-react'
+import { useState } from 'react'
+
+const toggleBtn = css({
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  color: 'token(colors.text.muted)',
+  padding: '4px',
+  borderRadius: '6px',
+  _hover: { background: 'token(colors.bg.subtle)' },
+})
+
+const panel = css({
+  position: 'fixed',
+  bottom: '24px',
+  right: '24px',
+  background: 'token(colors.bg.card)',
+  border: '1px solid token(colors.border.DEFAULT)',
+  borderRadius: '12px',
+  padding: '20px',
+  boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+  zIndex: 200,
+  minWidth: '240px',
+})
+
+const panelHeader = css({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '16px',
+  fontSize: '14px',
+  fontWeight: '600',
+  color: 'token(colors.text.DEFAULT)',
+})
+
+const section = css({ marginBottom: '16px' })
+const label = css({ fontSize: '12px', color: 'token(colors.text.muted)', marginBottom: '8px' })
+
+const sizeRow = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+})
+
+const sizeBtn = css({
+  width: '32px',
+  height: '32px',
+  borderRadius: '6px',
+  border: '1px solid token(colors.border.DEFAULT)',
+  background: 'token(colors.bg.subtle)',
+  cursor: 'pointer',
+  fontSize: '16px',
+  color: 'token(colors.text.DEFAULT)',
+  _hover: { background: 'token(colors.border.DEFAULT)' },
+})
+
+const sizeVal = css({ fontSize: '14px', color: 'token(colors.text.DEFAULT)', minWidth: '32px', textAlign: 'center' })
+
+const themeRow = css({ display: 'flex', gap: '8px' })
+
+const themeBtn = css({
+  flex: 1,
+  padding: '6px',
+  borderRadius: '6px',
+  border: '1px solid token(colors.border.DEFAULT)',
+  cursor: 'pointer',
+  fontSize: '12px',
+  transition: 'all 0.15s',
+})
+
+const THEMES = [
+  { key: 'light', label: '라이트', bg: '#ffffff', text: '#1a1a1a' },
+  { key: 'dark', label: '다크', bg: '#1a1a1a', text: '#e0e0e0' },
+  { key: 'sepia', label: '세피아', bg: '#f4ecd8', text: '#3b2f2f' },
+]
+
+export default function ReaderSettings({ settings, onChange }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <button className={toggleBtn} onClick={() => setOpen((v) => !v)} title="설정">
+        <Settings size={20} />
+      </button>
+
+      {open && (
+        <div className={panel}>
+          <div className={panelHeader}>
+            뷰어 설정
+            <button className={toggleBtn} onClick={() => setOpen(false)}><X size={16} /></button>
+          </div>
+
+          <div className={section}>
+            <p className={label}>글자 크기</p>
+            <div className={sizeRow}>
+              <button className={sizeBtn} onClick={() => onChange({ fontSize: Math.max(12, settings.fontSize - 2) })}>−</button>
+              <span className={sizeVal}>{settings.fontSize}px</span>
+              <button className={sizeBtn} onClick={() => onChange({ fontSize: Math.min(28, settings.fontSize + 2) })}>+</button>
+            </div>
+          </div>
+
+          <div className={section}>
+            <p className={label}>테마</p>
+            <div className={themeRow}>
+              {THEMES.map((t) => (
+                <button
+                  key={t.key}
+                  className={themeBtn}
+                  style={{
+                    background: t.bg,
+                    color: t.text,
+                    borderColor: settings.theme === t.key ? '#4f46e5' : undefined,
+                    borderWidth: settings.theme === t.key ? '2px' : undefined,
+                  }}
+                  onClick={() => onChange({ theme: t.key })}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
