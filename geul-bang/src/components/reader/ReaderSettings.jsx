@@ -121,6 +121,27 @@ export default function ReaderSettings({ settings, onChange }) {
               ))}
             </div>
           </div>
+
+          <div className={section}>
+            <p className={label}>읽기 방식</p>
+            <div className={themeRow}>
+              <button
+                className={themeBtn}
+                style={{ background: '#f0f0f0', color: '#1a1a1a', borderColor: '#4f46e5', borderWidth: '2px' }}
+                disabled
+              >
+                스크롤
+              </button>
+              <button
+                className={themeBtn}
+                style={{ background: '#f5f5f5', color: '#aaa', cursor: 'not-allowed' }}
+                disabled
+                title="준비 중인 기능입니다"
+              >
+                페이지 (준비 중)
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>

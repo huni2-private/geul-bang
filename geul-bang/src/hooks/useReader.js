@@ -26,17 +26,30 @@ export function useReader(novelId, initialScroll) {
   useEffect(() => {
     if (!user || !novelId) return
 
-    const save = debounce(() => {
+    function getProgress() {
       const scrollY = window.scrollY
       const maxScroll = document.body.scrollHeight - window.innerHeight
       const ratio = maxScroll > 0 ? scrollY / maxScroll : 0
-      updateProgress(user.uid, novelId, {
-        scrollPosition: scrollY,
-        progressRatio: Math.min(ratio, 1),
-      })
+      return { scrollPosition: scrollY, progressRatio: Math.min(ratio, 1) }
+    }
+
+    const save = debounce(() => {
+      updateProgress(user.uid, novelId, getProgress())
     }, 1000)
 
+    // 페이지 이탈 시 즉시 저장 (debounce 미발동 방지)
+    function saveNow() {
+      updateProgress(user.uid, novelId, getProgress())
+    }
+
     window.addEventListener('scroll', save, { passive: true })
-    return () => window.removeEventListener('scroll', save)
+    document.addEventListener('visibilitychange', saveNow)
+    window.addEventListener('pagehide', saveNow)
+
+    return () => {
+      window.removeEventListener('scroll', save)
+      document.removeEventListener('visibilitychange', saveNow)
+      window.removeEventListener('pagehide', saveNow)
+    }
   }, [user, novelId])
 }

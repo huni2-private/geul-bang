@@ -35,9 +35,14 @@ export default function AccountBanner() {
     try {
       await linkGoogle()
     } catch (e) {
+      if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+        return
+      }
       if (e.code === 'auth/credential-already-in-use') {
         alert('이미 다른 계정에 연동된 Google 계정입니다.')
+        return
       }
+      console.error('계정 연동 실패:', e)
     }
   }
 

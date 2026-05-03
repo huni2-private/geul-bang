@@ -11,8 +11,13 @@ export function AuthProvider({ children }) {
       if (firebaseUser) {
         setUser(firebaseUser)
       } else {
-        const newUser = await loginAnonymously()
-        setUser(newUser)
+        try {
+          const newUser = await loginAnonymously()
+          setUser(newUser)
+        } catch (e) {
+          console.error('익명 로그인 실패:', e)
+          alert('서비스에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.')
+        }
       }
     })
     return unsubscribe
