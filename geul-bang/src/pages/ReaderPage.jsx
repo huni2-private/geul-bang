@@ -4,13 +4,16 @@ import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { useReader } from '../hooks/useReader'
+import { usePageMode } from '../hooks/usePageMode'
 import Header from '../components/layout/Header'
 import ReaderSettings from '../components/reader/ReaderSettings'
+import PageControls from '../components/reader/PageControls'
+import { updateProgress } from '../services/novel.service'
 import { css } from 'styled-system/css'
 import { ArrowLeft } from 'lucide-react'
 
 const SETTINGS_KEY = 'geulbang_settings'
-const DEFAULT_SETTINGS = { fontSize: 18, theme: 'light' }
+const DEFAULT_SETTINGS = { fontSize: 18, theme: 'light', mode: 'scroll' }
 
 function loadSettings() {
   try {
@@ -52,7 +55,7 @@ const titleText = css({
   textAlign: 'center',
 })
 
-const content = css({
+const scrollContent = css({
   maxWidth: '680px',
   margin: '0 auto',
   padding: { base: '76px 16px 60px', sm: '88px 24px 80px' },
@@ -86,7 +89,34 @@ export default function ReaderPage() {
     load()
   }, [user, novelId, navigate])
 
-  useReader(novelId, novel?.scrollPosition ?? 0)
+  const isPageMode = settings.mode === 'page'
+
+  useReader(novelId, novel?.scrollPosition ?? 0, isPageMode)
+
+  const { currentPage, totalPages, colWidth, goNext, goPrev, progressRatio, wrapperRef, columnRef } =
+    usePageMode({
+      enabled: isPageMode && !loading && !!text,
+      text,
+      fontSize: settings.fontSize,
+      initialProgress: novel?.progressRatio ?? 0,
+    })
+
+  // Save progress on page turn
+  useEffect(() => {
+    if (!isPageMode || !user || !novelId || loading) return
+    updateProgress(user.uid, novelId, { scrollPosition: 0, progressRatio })
+  }, [isPageMode, user, novelId, loading, progressRatio])
+
+  // Keyboard navigation in page mode
+  useEffect(() => {
+    if (!isPageMode) return
+    function onKey(e) {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goPrev()
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goNext()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isPageMode, goPrev, goNext])
 
   function handleSettingsChange(patch) {
     setSettings((prev) => {
@@ -115,12 +145,53 @@ export default function ReaderPage() {
         <span className={titleText}>{novel?.title}</span>
         <ReaderSettings settings={settings} onChange={handleSettingsChange} />
       </Header>
-      <div
-        className={content}
-        style={{ fontSize: `${settings.fontSize}px`, color: themeStyle.color }}
-      >
-        {text}
-      </div>
+
+      {isPageMode ? (
+        <div
+          ref={wrapperRef}
+          style={{
+            position: 'relative',
+            overflow: 'hidden',
+            height: 'calc(100svh - 56px)',
+            marginTop: '56px',
+          }}
+        >
+          <div
+            ref={columnRef}
+            style={{
+              height: '100%',
+              padding: '0 24px',
+              columnFill: 'auto',
+              columnGap: 0,
+              columnWidth: colWidth,
+              fontSize: `${settings.fontSize}px`,
+              color: themeStyle.color,
+              lineHeight: '1.9',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-all',
+              fontFamily: 'var(--fonts-reader)',
+              willChange: 'transform',
+              transform: `translateX(${-currentPage * colWidth}px)`,
+              transition: 'transform 0.3s ease',
+            }}
+          >
+            {text}
+          </div>
+          <PageControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrev={goPrev}
+            onNext={goNext}
+          />
+        </div>
+      ) : (
+        <div
+          className={scrollContent}
+          style={{ fontSize: `${settings.fontSize}px`, color: themeStyle.color }}
+        >
+          {text}
+        </div>
+      )}
     </div>
   )
 }
