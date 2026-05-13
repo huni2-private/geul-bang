@@ -10,21 +10,22 @@ function debounce(fn, delay) {
   }
 }
 
-export function useReader(novelId, initialScroll) {
+export function useReader(novelId, initialScroll, disabled = false) {
   const user = useAuth()
   const initialized = useRef(false)
 
   // 저장된 위치로 이동
   useEffect(() => {
+    if (disabled) return
     if (!initialized.current && initialScroll > 0) {
       window.scrollTo({ top: initialScroll, behavior: 'instant' })
       initialized.current = true
     }
-  }, [initialScroll])
+  }, [initialScroll, disabled])
 
   // debounce 1초로 스크롤 위치 자동 저장
   useEffect(() => {
-    if (!user || !novelId) return
+    if (disabled || !user || !novelId) return
 
     function getProgress() {
       const scrollY = window.scrollY
@@ -51,5 +52,5 @@ export function useReader(novelId, initialScroll) {
       document.removeEventListener('visibilitychange', saveNow)
       window.removeEventListener('pagehide', saveNow)
     }
-  }, [user, novelId])
+  }, [user, novelId, disabled])
 }

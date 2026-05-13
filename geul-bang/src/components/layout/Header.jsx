@@ -11,15 +11,13 @@ const header = css({
   borderBottom: '1px solid token(colors.border)',
   transition: 'transform 0.3s ease',
   height: '56px',
-  display: 'flex',
-  alignItems: 'center',
 })
 
 const hidden = css({ transform: 'translateY(-100%)' })
 
 const headerInner = css({
   maxWidth: '680px',
-  width: '100%',
+  height: '100%',
   margin: '0 auto',
   padding: { base: '0 16px', sm: '0 20px' },
   display: 'flex',
