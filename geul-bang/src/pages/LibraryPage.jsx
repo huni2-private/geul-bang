@@ -39,14 +39,101 @@ const grid = css({
   gap: '12px',
 })
 
-const empty = css({
-  textAlign: 'center',
-  padding: '80px 20px',
-  color: 'token(colors.text.muted)',
+// ── 온보딩 빈 상태 ──────────────────────────────────────────
+
+const onboarding = css({
+  padding: { base: '40px 0 60px', sm: '56px 0 80px' },
 })
 
-const emptyTitle = css({ fontSize: '16px', marginBottom: '8px' })
-const emptyDesc = css({ fontSize: '14px', marginBottom: '24px' })
+const hero = css({
+  textAlign: 'center',
+  marginBottom: '48px',
+})
+
+const heroIcon = css({
+  fontSize: '48px',
+  display: 'block',
+  marginBottom: '20px',
+  lineHeight: 1,
+})
+
+const heroTitle = css({
+  fontSize: { base: '22px', sm: '26px' },
+  fontWeight: '700',
+  color: 'token(colors.text)',
+  marginBottom: '12px',
+  letterSpacing: '-0.5px',
+})
+
+const heroDesc = css({
+  fontSize: { base: '14px', sm: '15px' },
+  color: 'token(colors.text.muted)',
+  lineHeight: '1.7',
+  marginBottom: '28px',
+})
+
+const divider = css({
+  borderTop: '1px solid token(colors.border)',
+  margin: '40px 0',
+})
+
+const featureGrid = css({
+  display: 'grid',
+  gridTemplateColumns: { base: '1fr', sm: '1fr 1fr' },
+  gap: '16px',
+})
+
+const featureItem = css({
+  display: 'flex',
+  gap: '12px',
+  alignItems: 'flex-start',
+  padding: '16px',
+  borderRadius: '10px',
+  background: 'token(colors.bg.subtle)',
+  border: '1px solid token(colors.border)',
+})
+
+const featureDot = css({
+  width: '8px',
+  height: '8px',
+  borderRadius: '50%',
+  background: 'token(colors.accent)',
+  marginTop: '6px',
+  flexShrink: 0,
+})
+
+const featureName = css({
+  fontSize: '14px',
+  fontWeight: '600',
+  color: 'token(colors.text)',
+  display: 'block',
+  marginBottom: '4px',
+})
+
+const featureDesc = css({
+  fontSize: '13px',
+  color: 'token(colors.text.muted)',
+  lineHeight: '1.5',
+})
+
+const FEATURES = [
+  {
+    name: 'EUC-KR 자동 변환',
+    desc: '한국 웹소설 .txt 파일의 깨진 글자를 자동으로 변환합니다.',
+  },
+  {
+    name: '이어 읽기',
+    desc: '읽던 위치를 자동으로 저장해 다음에 그대로 이어 읽습니다.',
+  },
+  {
+    name: '테마·글자 크기',
+    desc: '라이트·다크·세피아 테마와 글자 크기를 자유롭게 조절합니다.',
+  },
+  {
+    name: '클라우드 동기',
+    desc: 'Google 계정을 연동하면 다른 기기에서도 같은 서재를 씁니다.',
+  },
+]
 
 export default function LibraryPage() {
   const user = useAuth()
@@ -65,24 +152,49 @@ export default function LibraryPage() {
       <Header />
       <AccountBanner />
       <div className={inner}>
-        <div className={topRow}>
-          <h1 className={heading}>내 서재</h1>
-          <FileUploader onUpload={uploadNovel} uploading={uploading} />
-        </div>
 
         {novels.length === 0 ? (
-          <div className={empty}>
-            <p className={emptyTitle}>서재가 비어 있어요.</p>
-            <p className={emptyDesc}>.txt 파일을 업로드해서 첫 소설을 추가해보세요.</p>
-            <FileUploader onUpload={uploadNovel} uploading={uploading} />
+          // ── 빈 서재: 온보딩 화면 ──
+          <div className={onboarding}>
+            <div className={hero}>
+              <span className={heroIcon}>📚</span>
+              <h1 className={heroTitle}>나만의 웹소설 리더</h1>
+              <p className={heroDesc}>
+                .txt 파일을 올리면 기기에 상관없이 어디서든 이어 읽을 수 있어요.<br />
+                EUC-KR 인코딩도 자동으로 변환해 드립니다.
+              </p>
+              <FileUploader onUpload={uploadNovel} uploading={uploading} />
+            </div>
+
+            <hr className={divider} />
+
+            <div className={featureGrid}>
+              {FEATURES.map((f) => (
+                <div key={f.name} className={featureItem}>
+                  <span className={featureDot} />
+                  <div>
+                    <span className={featureName}>{f.name}</span>
+                    <span className={featureDesc}>{f.desc}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
-          <div className={grid}>
-            {novels.map((novel) => (
-              <NovelCard key={novel.id} novel={novel} onDelete={removeNovel} />
-            ))}
-          </div>
+          // ── 소설 목록 ──
+          <>
+            <div className={topRow}>
+              <h1 className={heading}>내 서재</h1>
+              <FileUploader onUpload={uploadNovel} uploading={uploading} />
+            </div>
+            <div className={grid}>
+              {novels.map((novel) => (
+                <NovelCard key={novel.id} novel={novel} onDelete={removeNovel} />
+              ))}
+            </div>
+          </>
         )}
+
       </div>
     </div>
   )
