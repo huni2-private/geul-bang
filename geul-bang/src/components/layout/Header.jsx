@@ -10,14 +10,22 @@ const header = css({
   background: 'token(colors.bg)',
   borderBottom: '1px solid token(colors.border)',
   transition: 'transform 0.3s ease',
-  padding: { base: '0 16px', sm: '0 20px' },
   height: '56px',
+  display: 'flex',
+  alignItems: 'center',
+})
+
+const hidden = css({ transform: 'translateY(-100%)' })
+
+const headerInner = css({
+  maxWidth: '680px',
+  width: '100%',
+  margin: '0 auto',
+  padding: { base: '0 16px', sm: '0 20px' },
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
 })
-
-const hidden = css({ transform: 'translateY(-100%)' })
 
 const logo = css({
   fontSize: '20px',
@@ -32,8 +40,10 @@ export default function Header({ children }) {
 
   return (
     <header className={`${header} ${isHidden ? hidden : ''}`}>
-      <a href="/" className={logo}>글방</a>
-      {children}
+      <div className={headerInner}>
+        <a href="/" className={logo}>글방</a>
+        {children}
+      </div>
     </header>
   )
 }
