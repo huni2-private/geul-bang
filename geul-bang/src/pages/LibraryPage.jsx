@@ -11,7 +11,10 @@ import { usePWAInstall } from '../hooks/usePWAInstall'
 
 const wrap = css({
   paddingTop: '56px',
-  minHeight: '100svh',
+  height: '100svh',
+  overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
   background: 'token(colors.bg)',
 })
 
@@ -26,6 +29,7 @@ const installBanner = css({
   fontSize: '13px',
   color: 'token(colors.text.muted)',
   flexWrap: 'wrap',
+  flexShrink: 0,
 })
 
 const installBtn = css({
@@ -42,8 +46,11 @@ const installBtn = css({
 })
 
 const inner = css({
+  flex: 1,
+  overflowY: 'auto',
   maxWidth: '680px',
   margin: '0 auto',
+  width: '100%',
   padding: { base: '24px 16px', sm: '32px 20px' },
 })
 
