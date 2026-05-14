@@ -8,12 +8,19 @@ import { usePageMode } from '../hooks/usePageMode'
 import Header from '../components/layout/Header'
 import ReaderSettings from '../components/reader/ReaderSettings'
 import PageControls from '../components/reader/PageControls'
+import ChapterDrawer from '../components/reader/ChapterDrawer'
 import { updateProgress } from '../services/novel.service'
+import { detectChapters } from '../utils/chapter'
 import { css } from 'styled-system/css'
 import { ArrowLeft } from 'lucide-react'
 
 const SETTINGS_KEY = 'geulbang_settings'
-const DEFAULT_SETTINGS = { fontSize: 18, theme: 'light', mode: 'scroll' }
+const DEFAULT_SETTINGS = { fontSize: 18, theme: 'light', mode: 'scroll', font: 'serif' }
+
+const FONT_FAMILIES = {
+  serif: 'var(--fonts-reader)',
+  sans: 'var(--fonts-ui)',
+}
 
 function loadSettings() {
   try {
@@ -21,12 +28,6 @@ function loadSettings() {
   } catch {
     return DEFAULT_SETTINGS
   }
-}
-
-const THEME_STYLES = {
-  light: { background: '#ffffff', color: '#1a1a1a' },
-  dark: { background: '#1a1a1a', color: '#e0e0e0' },
-  sepia: { background: '#f4ecd8', color: '#3b2f2f' },
 }
 
 const backBtn = css({
@@ -55,6 +56,23 @@ const titleText = css({
   textAlign: 'center',
 })
 
+const progressBar = css({
+  position: 'fixed',
+  top: '56px',
+  left: 0,
+  height: '3px',
+  zIndex: 101,
+  transition: 'width 0.1s linear',
+  background: 'token(colors.accent)',
+  pointerEvents: 'none',
+})
+
+const pageWrap = css({
+  minHeight: '100svh',
+  background: 'token(colors.bg)',
+  color: 'token(colors.text)',
+})
+
 const scrollContent = css({
   maxWidth: '680px',
   margin: '0 auto',
@@ -62,7 +80,6 @@ const scrollContent = css({
   lineHeight: '1.9',
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-all',
-  fontFamily: 'token(fonts.reader)',
 })
 
 export default function ReaderPage() {
@@ -90,10 +107,32 @@ export default function ReaderPage() {
   }, [user, novelId, navigate])
 
   const isPageMode = settings.mode === 'page'
+  const dataTheme = settings.theme !== 'light' ? settings.theme : undefined
+  const fontFamily = FONT_FAMILIES[settings.font] || FONT_FAMILIES.serif
+
+  const [scrollPct, setScrollPct] = useState(0)
+  const [chapters, setChapters] = useState([])
+
+  useEffect(() => {
+    if (!text) return
+    setChapters(detectChapters(text))
+  }, [text])
+
+  // 스크롤 모드 진행 바
+  useEffect(() => {
+    if (isPageMode) { setScrollPct(0); return }
+    function onScroll() {
+      const max = document.body.scrollHeight - window.innerHeight
+      setScrollPct(max > 0 ? Math.min(window.scrollY / max, 1) : 0)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [isPageMode])
 
   useReader(novelId, novel?.scrollPosition ?? 0, isPageMode)
 
-  const { currentPage, totalPages, colWidth, goNext, goPrev, progressRatio, wrapperRef, columnRef } =
+  const { currentPage, totalPages, colWidth, goNext, goPrev, goToPage, progressRatio, wrapperRef, columnRef } =
     usePageMode({
       enabled: isPageMode && !loading && !!text,
       text,
@@ -118,6 +157,16 @@ export default function ReaderPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [isPageMode, goPrev, goNext])
 
+  function handleChapterJump(chapter) {
+    const ratio = text.length > 0 ? chapter.charOffset / text.length : 0
+    if (isPageMode) {
+      goToPage(Math.round(ratio * (totalPages - 1)))
+    } else {
+      const max = document.body.scrollHeight - window.innerHeight
+      window.scrollTo({ top: ratio * max, behavior: 'smooth' })
+    }
+  }
+
   function handleSettingsChange(patch) {
     setSettings((prev) => {
       const next = { ...prev, ...patch }
@@ -126,23 +175,33 @@ export default function ReaderPage() {
     })
   }
 
-  const themeStyle = THEME_STYLES[settings.theme] || THEME_STYLES.light
-
   if (!user || loading) {
     return (
-      <div style={{ ...themeStyle, minHeight: '100svh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div
+        className={pageWrap}
+        data-theme={dataTheme}
+        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      >
         <span style={{ fontSize: '14px', opacity: 0.5 }}>불러오는 중...</span>
       </div>
     )
   }
 
   return (
-    <div style={{ ...themeStyle, minHeight: '100svh' }}>
+    <div className={pageWrap} data-theme={dataTheme}>
+      {!isPageMode && (
+        <div className={progressBar} style={{ width: `${scrollPct * 100}%` }} />
+      )}
       <Header>
         <button className={backBtn} onClick={() => navigate('/')}>
           <ArrowLeft size={16} /> 서재
         </button>
         <span className={titleText}>{novel?.title}</span>
+        <ChapterDrawer
+          chapters={chapters}
+          currentCharOffset={Math.round((isPageMode ? progressRatio : scrollPct) * (text.length || 0))}
+          onJump={handleChapterJump}
+        />
         <ReaderSettings settings={settings} onChange={handleSettingsChange} />
       </Header>
 
@@ -165,11 +224,10 @@ export default function ReaderPage() {
               columnGap: 0,
               columnWidth: colWidth,
               fontSize: `${settings.fontSize}px`,
-              color: themeStyle.color,
               lineHeight: '1.9',
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-all',
-              fontFamily: 'var(--fonts-reader)',
+              fontFamily,
               willChange: 'transform',
               transform: `translateX(${-currentPage * colWidth}px)`,
               transition: 'transform 0.3s ease',
@@ -187,7 +245,7 @@ export default function ReaderPage() {
       ) : (
         <div
           className={scrollContent}
-          style={{ fontSize: `${settings.fontSize}px`, color: themeStyle.color }}
+          style={{ fontSize: `${settings.fontSize}px`, fontFamily }}
         >
           {text}
         </div>

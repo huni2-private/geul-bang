@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react'
 
 const H_PAD = 48 // 24px * 2
+const SWIPE_THRESHOLD = 50
 
 function getInitialColWidth() {
   return typeof window !== 'undefined' ? Math.max(200, window.innerWidth - H_PAD) : 300
@@ -10,6 +11,7 @@ export function usePageMode({ enabled, text, fontSize, initialProgress = 0 }) {
   const wrapperRef = useRef(null)
   const columnRef = useRef(null)
   const initialized = useRef(false)
+  const touchStartX = useRef(null)
 
   const [state, setState] = useState(() => ({
     currentPage: 0,
@@ -62,7 +64,36 @@ export function usePageMode({ enabled, text, fontSize, initialProgress = 0 }) {
   const goPrev = useCallback(() =>
     setState(s => ({ ...s, currentPage: Math.max(s.currentPage - 1, 0) })), [])
 
+  const goToPage = useCallback((page) =>
+    setState(s => ({ ...s, currentPage: Math.min(Math.max(page, 0), s.totalPages - 1) })), [])
+
+  // 터치 스와이프 — 좌: 다음, 우: 이전
+  useEffect(() => {
+    if (!enabled) return
+    const el = wrapperRef.current
+    if (!el) return
+
+    function onTouchStart(e) {
+      touchStartX.current = e.touches[0].clientX
+    }
+    function onTouchEnd(e) {
+      if (touchStartX.current === null) return
+      const delta = touchStartX.current - e.changedTouches[0].clientX
+      if (Math.abs(delta) >= SWIPE_THRESHOLD) {
+        delta > 0 ? goNext() : goPrev()
+      }
+      touchStartX.current = null
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true })
+    el.addEventListener('touchend', onTouchEnd, { passive: true })
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [enabled, goNext, goPrev])
+
   const progressRatio = state.totalPages > 1 ? state.currentPage / (state.totalPages - 1) : 0
 
-  return { ...state, goNext, goPrev, progressRatio, wrapperRef, columnRef }
+  return { ...state, goNext, goPrev, goToPage, progressRatio, wrapperRef, columnRef }
 }

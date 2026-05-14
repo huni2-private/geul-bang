@@ -1,15 +1,44 @@
+import { useState } from 'react'
 import { css } from 'styled-system/css'
 import Header from '../components/layout/Header'
 import AccountBanner from '../components/auth/AccountBanner'
 import NovelCard from '../components/library/NovelCard'
 import FileUploader from '../components/library/FileUploader'
+import LinkAccountModal from '../components/auth/LinkAccountModal'
 import { useNovels } from '../hooks/useNovels'
 import { useAuth } from '../contexts/AuthContext'
+import { usePWAInstall } from '../hooks/usePWAInstall'
 
 const wrap = css({
   paddingTop: '56px',
   minHeight: '100svh',
   background: 'token(colors.bg)',
+})
+
+const installBanner = css({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: '12px',
+  padding: '10px 16px',
+  background: 'token(colors.bg.subtle)',
+  borderBottom: '1px solid token(colors.border)',
+  fontSize: '13px',
+  color: 'token(colors.text.muted)',
+  flexWrap: 'wrap',
+})
+
+const installBtn = css({
+  padding: '5px 14px',
+  borderRadius: '6px',
+  border: '1px solid token(colors.accent)',
+  background: 'transparent',
+  color: 'token(colors.accent)',
+  fontSize: '13px',
+  fontWeight: '600',
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+  _hover: { background: 'token(colors.bg.card)' },
 })
 
 const inner = css({
@@ -138,6 +167,13 @@ const FEATURES = [
 export default function LibraryPage() {
   const user = useAuth()
   const { novels, uploading, uploadNovel, removeNovel } = useNovels()
+  const [showLinkModal, setShowLinkModal] = useState(false)
+  const { canInstall, install } = usePWAInstall()
+
+  async function handleUpload(file) {
+    await uploadNovel(file)
+    if (user?.isAnonymous) setShowLinkModal(true)
+  }
 
   if (!user) {
     return (
@@ -149,8 +185,15 @@ export default function LibraryPage() {
 
   return (
     <div className={wrap}>
+      {showLinkModal && <LinkAccountModal onClose={() => setShowLinkModal(false)} />}
       <Header />
       <AccountBanner />
+      {canInstall && (
+        <div className={installBanner}>
+          <span>홈 화면에 추가하면 앱처럼 바로 열 수 있어요.</span>
+          <button className={installBtn} onClick={install}>홈에 추가</button>
+        </div>
+      )}
       <div className={inner}>
 
         {novels.length === 0 ? (
@@ -163,7 +206,7 @@ export default function LibraryPage() {
                 .txt 파일을 올리면 기기에 상관없이 어디서든 이어 읽을 수 있어요.<br />
                 EUC-KR 인코딩도 자동으로 변환해 드립니다.
               </p>
-              <FileUploader onUpload={uploadNovel} uploading={uploading} />
+              <FileUploader onUpload={handleUpload} uploading={uploading} />
             </div>
 
             <hr className={divider} />
@@ -185,7 +228,7 @@ export default function LibraryPage() {
           <>
             <div className={topRow}>
               <h1 className={heading}>내 서재</h1>
-              <FileUploader onUpload={uploadNovel} uploading={uploading} />
+              <FileUploader onUpload={handleUpload} uploading={uploading} />
             </div>
             <div className={grid}>
               {novels.map((novel) => (

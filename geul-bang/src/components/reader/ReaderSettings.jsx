@@ -59,16 +59,18 @@ const sizeBtn = css({
 
 const sizeVal = css({ fontSize: '14px', color: 'token(colors.text)', minWidth: '32px', textAlign: 'center' })
 
-const themeRow = css({ display: 'flex', gap: '8px' })
+const btnRow = css({ display: 'flex', gap: '8px' })
 
-const themeBtn = css({
+const optBtn = css({
   flex: 1,
   padding: '6px',
   borderRadius: '6px',
   border: '1px solid token(colors.border)',
   cursor: 'pointer',
   fontSize: '12px',
-  transition: 'all 0.15s',
+  transition: 'border-color 0.15s',
+  background: 'token(colors.bg.subtle)',
+  color: 'token(colors.text)',
 })
 
 const THEMES = [
@@ -87,64 +89,92 @@ export default function ReaderSettings({ settings, onChange }) {
       </button>
 
       {open && (
-        <div className={panel}>
-          <div className={panelHeader}>
-            뷰어 설정
-            <button className={toggleBtn} onClick={() => setOpen(false)}><X size={16} /></button>
-          </div>
+        <>
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 199 }}
+            onClick={() => setOpen(false)}
+          />
+          <div className={panel}>
+            <div className={panelHeader}>
+              뷰어 설정
+              <button className={toggleBtn} onClick={() => setOpen(false)}><X size={16} /></button>
+            </div>
 
-          <div className={section}>
-            <p className={label}>글자 크기</p>
-            <div className={sizeRow}>
-              <button className={sizeBtn} onClick={() => onChange({ fontSize: Math.max(12, settings.fontSize - 2) })}>−</button>
-              <span className={sizeVal}>{settings.fontSize}px</span>
-              <button className={sizeBtn} onClick={() => onChange({ fontSize: Math.min(28, settings.fontSize + 2) })}>+</button>
+            <div className={section}>
+              <p className={label}>글자 크기</p>
+              <div className={sizeRow}>
+                <button className={sizeBtn} onClick={() => onChange({ fontSize: Math.max(12, settings.fontSize - 2) })}>−</button>
+                <span className={sizeVal}>{settings.fontSize}px</span>
+                <button className={sizeBtn} onClick={() => onChange({ fontSize: Math.min(28, settings.fontSize + 2) })}>+</button>
+              </div>
+            </div>
+
+            <div className={section}>
+              <p className={label}>테마</p>
+              <div className={btnRow}>
+                {THEMES.map((t) => (
+                  <button
+                    key={t.key}
+                    className={optBtn}
+                    style={{
+                      background: t.bg,
+                      color: t.text,
+                      borderColor: settings.theme === t.key ? 'var(--colors-accent)' : undefined,
+                      borderWidth: settings.theme === t.key ? '2px' : undefined,
+                    }}
+                    onClick={() => onChange({ theme: t.key })}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={section}>
+              <p className={label}>서체</p>
+              <div className={btnRow}>
+                {[
+                  { key: 'serif', label: '명조체', style: { fontFamily: 'var(--fonts-reader)' } },
+                  { key: 'sans', label: '고딕체', style: { fontFamily: 'var(--fonts-ui)' } },
+                ].map((f) => (
+                  <button
+                    key={f.key}
+                    className={optBtn}
+                    style={{
+                      ...f.style,
+                      borderColor: settings.font === f.key ? 'var(--colors-accent)' : undefined,
+                      borderWidth: settings.font === f.key ? '2px' : undefined,
+                      fontWeight: settings.font === f.key ? '600' : undefined,
+                    }}
+                    onClick={() => onChange({ font: f.key })}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={section}>
+              <p className={label}>읽기 방식</p>
+              <div className={btnRow}>
+                {[{ key: 'scroll', label: '스크롤' }, { key: 'page', label: '페이지' }].map((m) => (
+                  <button
+                    key={m.key}
+                    className={optBtn}
+                    style={{
+                      borderColor: settings.mode === m.key ? 'var(--colors-accent)' : undefined,
+                      borderWidth: settings.mode === m.key ? '2px' : undefined,
+                      fontWeight: settings.mode === m.key ? '600' : undefined,
+                    }}
+                    onClick={() => onChange({ mode: m.key })}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-
-          <div className={section}>
-            <p className={label}>테마</p>
-            <div className={themeRow}>
-              {THEMES.map((t) => (
-                <button
-                  key={t.key}
-                  className={themeBtn}
-                  style={{
-                    background: t.bg,
-                    color: t.text,
-                    borderColor: settings.theme === t.key ? '#4f46e5' : undefined,
-                    borderWidth: settings.theme === t.key ? '2px' : undefined,
-                  }}
-                  onClick={() => onChange({ theme: t.key })}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className={section}>
-            <p className={label}>읽기 방식</p>
-            <div className={themeRow}>
-              {[{ key: 'scroll', label: '스크롤' }, { key: 'page', label: '페이지' }].map((m) => (
-                <button
-                  key={m.key}
-                  className={themeBtn}
-                  style={{
-                    background: '#f0f0f0',
-                    color: '#1a1a1a',
-                    borderColor: settings.mode === m.key ? '#4f46e5' : undefined,
-                    borderWidth: settings.mode === m.key ? '2px' : undefined,
-                    fontWeight: settings.mode === m.key ? '600' : undefined,
-                  }}
-                  onClick={() => onChange({ mode: m.key })}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        </>
       )}
     </>
   )

@@ -2,14 +2,31 @@ import { css } from 'styled-system/css'
 import { useNavigate } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 
+// 제목 문자열로 일관된 HSL 색상 생성
+function titleToHsl(str) {
+  const hue = [...str].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0) % 360
+  return `hsl(${hue}, 55%, 55%)`
+}
+
 const card = css({
   background: 'token(colors.bg.card)',
   border: '1px solid token(colors.border)',
   borderRadius: '10px',
-  padding: '16px',
+  padding: '16px 16px 16px 20px',
   cursor: 'pointer',
   transition: 'box-shadow 0.15s',
+  position: 'relative',
+  overflow: 'hidden',
   _hover: { boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
+})
+
+const accentBar = css({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  bottom: 0,
+  width: '4px',
+  borderRadius: '10px 0 0 10px',
 })
 
 const titleRow = css({
@@ -77,6 +94,7 @@ function formatDate(ts) {
 export default function NovelCard({ novel, onDelete }) {
   const navigate = useNavigate()
   const pctVal = Math.round((novel.progressRatio || 0) * 100)
+  const accentColor = titleToHsl(novel.title || '')
 
   function handleDelete(e) {
     e.stopPropagation()
@@ -87,6 +105,7 @@ export default function NovelCard({ novel, onDelete }) {
 
   return (
     <div className={card} onClick={() => navigate(`/reader/${novel.id}`)}>
+      <div className={accentBar} style={{ background: accentColor }} />
       <div className={titleRow}>
         <span className={title}>📖 {novel.title}</span>
         <button className={deleteBtn} onClick={handleDelete} title="삭제">
@@ -95,7 +114,7 @@ export default function NovelCard({ novel, onDelete }) {
       </div>
       <p className={meta}>마지막: {formatDate(novel.lastReadAt)}</p>
       <div className={barWrap}>
-        <div className={bar} style={{ width: `${pctVal}%` }} />
+        <div className={bar} style={{ width: `${pctVal}%`, background: accentColor }} />
       </div>
       <p className={pct}>{pctVal}%</p>
     </div>
