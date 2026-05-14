@@ -39,6 +39,15 @@ const menuBtn = css({
   _hover: { background: 'token(colors.bg.subtle)' },
 })
 
+const logo = css({
+  fontSize: '18px',
+  fontWeight: '700',
+  color: 'token(colors.text)',
+  textDecoration: 'none',
+  letterSpacing: '-0.5px',
+  flexShrink: 0,
+})
+
 export default function Header({ children }) {
   const isHidden = useScrollDirection()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -50,6 +59,7 @@ export default function Header({ children }) {
           <button className={menuBtn} onClick={() => setMenuOpen(true)}>
             <Menu size={20} />
           </button>
+          <a href="/" className={logo}>글방</a>
           {children}
         </div>
       </header>
