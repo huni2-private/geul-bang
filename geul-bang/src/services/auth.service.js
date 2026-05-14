@@ -1,6 +1,8 @@
 import {
   signInAnonymously,
+  signOut,
   GoogleAuthProvider,
+  signInWithPopup,
   linkWithPopup,
   onAuthStateChanged,
 } from 'firebase/auth'
@@ -19,4 +21,14 @@ export async function linkGoogle() {
   const provider = new GoogleAuthProvider()
   const result = await linkWithPopup(auth.currentUser, provider)
   return result.user
+}
+
+export async function loginWithGoogle() {
+  const provider = new GoogleAuthProvider()
+  const result = await signInWithPopup(auth, provider)
+  return result.user
+}
+
+export async function logOut() {
+  await signOut(auth)
 }

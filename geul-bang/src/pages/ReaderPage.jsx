@@ -107,7 +107,8 @@ export default function ReaderPage() {
   }, [user, novelId, navigate])
 
   const isPageMode = settings.mode === 'page'
-  const dataTheme = settings.theme !== 'light' ? settings.theme : undefined
+  // 항상 명시적으로 설정 — 전역 html data-theme을 덮어쓰기 위해 light도 포함
+  const dataTheme = settings.theme
   const fontFamily = FONT_FAMILIES[settings.font] || FONT_FAMILIES.serif
 
   const [scrollPct, setScrollPct] = useState(0)

@@ -1,5 +1,16 @@
 @layer reset, base, tokens, recipes, utilities;
 
+/* 리더 로컬 테마가 전역 html data-theme을 재정의할 수 있도록 light reset 정의 */
+[data-theme="light"] {
+  --colors-bg: #ffffff;
+  --colors-bg-subtle: #f9f9f9;
+  --colors-bg-card: #ffffff;
+  --colors-text: #1a1a1a;
+  --colors-text-muted: #6b7280;
+  --colors-border: #e5e7eb;
+  --colors-accent: #4f46e5;
+}
+
 body {
   font-family: 'Pretendard', 'Noto Sans KR', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;

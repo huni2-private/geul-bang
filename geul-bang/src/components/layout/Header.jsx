@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import { css } from 'styled-system/css'
+import { Menu } from 'lucide-react'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
+import NavDrawer from './NavDrawer'
 
 const header = css({
   position: 'fixed',
@@ -16,32 +19,41 @@ const header = css({
 const hidden = css({ transform: 'translateY(-100%)' })
 
 const headerInner = css({
-  maxWidth: '680px',
   height: '100%',
-  margin: '0 auto',
   padding: { base: '0 16px', sm: '0 20px' },
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'space-between',
+  gap: '8px',
 })
 
-const logo = css({
-  fontSize: '20px',
-  fontWeight: '700',
-  color: 'token(colors.text)',
-  textDecoration: 'none',
-  letterSpacing: '-0.5px',
+const menuBtn = css({
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  color: 'token(colors.text.muted)',
+  padding: '6px',
+  borderRadius: '6px',
+  display: 'flex',
+  alignItems: 'center',
+  flexShrink: 0,
+  _hover: { background: 'token(colors.bg.subtle)' },
 })
 
 export default function Header({ children }) {
   const isHidden = useScrollDirection()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <header className={`${header} ${isHidden ? hidden : ''}`}>
-      <div className={headerInner}>
-        <a href="/" className={logo}>글방</a>
-        {children}
-      </div>
-    </header>
+    <>
+      <header className={`${header} ${isHidden ? hidden : ''}`}>
+        <div className={headerInner}>
+          <button className={menuBtn} onClick={() => setMenuOpen(true)}>
+            <Menu size={20} />
+          </button>
+          {children}
+        </div>
+      </header>
+      <NavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />
+    </>
   )
 }
