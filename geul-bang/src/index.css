@@ -2,13 +2,27 @@
 
 /* 리더 로컬 테마가 전역 html data-theme을 재정의할 수 있도록 light reset 정의 */
 [data-theme="light"] {
-  --colors-bg: #ffffff;
-  --colors-bg-subtle: #f9f9f9;
+  --colors-bg: #F4F6FB;
+  --colors-bg-subtle: #eef0f6;
   --colors-bg-card: #ffffff;
-  --colors-text: #1a1a1a;
+  --colors-bg-overlay: rgba(0,0,0,0.48);
+  --colors-text: #1a1a2e;
   --colors-text-muted: #6b7280;
-  --colors-border: #e5e7eb;
-  --colors-accent: #4f46e5;
+  --colors-text-disabled: #d1d5db;
+  --colors-text-inverse: #ffffff;
+  --colors-border: #e2e5ee;
+  --colors-border-strong: #9ca3af;
+  --colors-accent: #3B5BDB;
+  --colors-accent-hover: #3451c7;
+  --colors-accent-pressed: #2c44ad;
+  --colors-accent-subtle: #eef2ff;
+  --colors-accent-muted: #c7d2fe;
+  --colors-error: #ef4444;
+  --colors-error-subtle: #fee2e2;
+  --colors-warning: #f59e0b;
+  --colors-warning-subtle: #fef3c7;
+  --colors-success: #16a34a;
+  --colors-success-subtle: #dcfce7;
 }
 
 body {
@@ -19,4 +33,20 @@ body {
 
 #root {
   min-height: 100svh;
+}
+
+/* 접근성: 키보드 포커스 링 */
+:focus-visible {
+  outline: 2px solid var(--colors-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 접근성: 움직임 감소 모드 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

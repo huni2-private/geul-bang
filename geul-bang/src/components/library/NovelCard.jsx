@@ -3,9 +3,12 @@ import { css } from 'styled-system/css'
 import { useNavigate } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 
-function titleToHsl(str) {
+function titleColors(str) {
   const hue = [...str].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0) % 360
-  return `hsl(${hue}, 55%, 55%)`
+  return {
+    gradient: `linear-gradient(135deg, hsl(${hue}, 55%, 60%), hsl(${hue}, 62%, 38%))`,
+    solid: `hsl(${hue}, 55%, 50%)`,
+  }
 }
 
 const card = css({
@@ -104,7 +107,7 @@ function formatDate(ts) {
 export default function NovelCard({ novel, onDelete }) {
   const navigate = useNavigate()
   const pctVal = Math.round((novel.progressRatio || 0) * 100)
-  const accentColor = titleToHsl(novel.title || '')
+  const { gradient, solid } = titleColors(novel.title || '')
 
   function handleDelete(e) {
     e.stopPropagation()
@@ -115,7 +118,7 @@ export default function NovelCard({ novel, onDelete }) {
 
   return (
     <div className={card} onClick={() => navigate(`/reader/${novel.id}`)}>
-      <div className={cover} style={{ background: accentColor }}>
+      <div className={cover} style={{ background: gradient }}>
         {novel.title.charAt(0)}
       </div>
       <div className={contentWrap}>
@@ -127,7 +130,7 @@ export default function NovelCard({ novel, onDelete }) {
         </div>
         <p className={meta}>마지막: {formatDate(novel.lastReadAt)}</p>
         <div className={barWrap}>
-          <div className={bar} style={{ width: `${pctVal}%`, background: accentColor }} />
+          <div className={bar} style={{ width: `${pctVal}%`, background: solid }} />
         </div>
         <p className={pct}>{pctVal}%</p>
       </div>
