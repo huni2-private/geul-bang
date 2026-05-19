@@ -7,11 +7,16 @@ import { useAuth } from '../contexts/AuthContext'
 export function useNovels() {
   const user = useAuth()
   const [novels, setNovels] = useState([])
+  const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     if (!user) return
-    const unsubscribe = subscribeNovels(user.uid, setNovels)
+    setLoading(true)
+    const unsubscribe = subscribeNovels(user.uid, (data) => {
+      setNovels(data)
+      setLoading(false)
+    })
     return unsubscribe
   }, [user])
 
@@ -40,5 +45,5 @@ export function useNovels() {
     await deleteNovel(user.uid, novel.id)
   }
 
-  return { novels, uploading, uploadNovel, removeNovel }
+  return { novels, loading, uploading, uploadNovel, removeNovel }
 }

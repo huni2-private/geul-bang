@@ -1,4 +1,5 @@
-import { useState } from 'react'
+// 서재 페이지 — 소설 목록, 정렬, 스켈레톤 로딩
+import { useState, useMemo } from 'react'
 import { css } from 'styled-system/css'
 import Header from '../components/layout/Header'
 import AccountBanner from '../components/auth/AccountBanner'
@@ -8,6 +9,13 @@ import LinkAccountModal from '../components/auth/LinkAccountModal'
 import { useNovels } from '../hooks/useNovels'
 import { useAuth } from '../contexts/AuthContext'
 import { usePWAInstall } from '../hooks/usePWAInstall'
+
+const SORT_KEY = 'geulbang_sort'
+const SORT_OPTIONS = [
+  { value: 'lastRead', label: '최근 읽은 순' },
+  { value: 'title', label: '제목 순' },
+  { value: 'progress', label: '진행률 순' },
+]
 
 const wrap = css({
   paddingTop: '56px',
@@ -69,10 +77,31 @@ const heading = css({
   color: 'token(colors.text)',
 })
 
+const sortSelect = css({
+  fontSize: '13px',
+  padding: '4px 8px',
+  borderRadius: '6px',
+  border: '1px solid token(colors.border)',
+  background: 'token(colors.bg.card)',
+  color: 'token(colors.text)',
+  cursor: 'pointer',
+})
+
 const grid = css({
   display: 'flex',
   flexDirection: 'column',
   gap: '12px',
+})
+
+const skeletonCard = css({
+  background: 'token(colors.bg.card)',
+  border: '1px solid token(colors.border)',
+  borderRadius: '10px',
+  padding: '12px 16px 12px 12px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  opacity: 0.5,
 })
 
 // ── 온보딩 빈 상태 ──────────────────────────────────────────
@@ -173,14 +202,37 @@ const FEATURES = [
 
 export default function LibraryPage() {
   const user = useAuth()
-  const { novels, uploading, uploadNovel, removeNovel } = useNovels()
+  const { novels, loading, uploading, uploadNovel, removeNovel } = useNovels()
   const [showLinkModal, setShowLinkModal] = useState(false)
+  const [sortOrder, setSortOrder] = useState(() =>
+    localStorage.getItem(SORT_KEY) || 'lastRead'
+  )
   const { canInstall, install } = usePWAInstall()
 
   async function handleUpload(file) {
     await uploadNovel(file)
     if (user?.isAnonymous) setShowLinkModal(true)
   }
+
+  function handleSortChange(value) {
+    setSortOrder(value)
+    localStorage.setItem(SORT_KEY, value)
+  }
+
+  const sortedNovels = useMemo(() => {
+    const list = [...novels]
+    if (sortOrder === 'title') {
+      return list.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'ko'))
+    }
+    if (sortOrder === 'progress') {
+      return list.sort((a, b) => (b.progressRatio || 0) - (a.progressRatio || 0))
+    }
+    // lastRead: lastReadAt 내림차순, null은 뒤로
+    return list.sort((a, b) => {
+      const toMs = (ts) => ts?.toMillis ? ts.toMillis() : ts ? new Date(ts).getTime() : 0
+      return toMs(b.lastReadAt) - toMs(a.lastReadAt)
+    })
+  }, [novels, sortOrder])
 
   if (!user) {
     return (
@@ -203,7 +255,21 @@ export default function LibraryPage() {
       )}
       <div className={inner}>
 
-        {novels.length === 0 ? (
+        {loading ? (
+          // ── 스켈레톤 ──
+          <div className={grid}>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className={skeletonCard}>
+                <div style={{ width: 64, height: 80, borderRadius: 8, background: 'currentColor', opacity: 0.3 }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ height: 16, borderRadius: 4, background: 'currentColor', opacity: 0.3, marginBottom: 8, width: '60%' }} />
+                  <div style={{ height: 12, borderRadius: 4, background: 'currentColor', opacity: 0.3, marginBottom: 10, width: '40%' }} />
+                  <div style={{ height: 6, borderRadius: 99, background: 'currentColor', opacity: 0.3 }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : novels.length === 0 ? (
           // ── 빈 서재: 온보딩 화면 ──
           <div className={onboarding}>
             <div className={hero}>
@@ -235,10 +301,21 @@ export default function LibraryPage() {
           <>
             <div className={topRow}>
               <h1 className={heading}>내 서재</h1>
-              <FileUploader onUpload={handleUpload} uploading={uploading} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <select
+                  className={sortSelect}
+                  value={sortOrder}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                >
+                  {SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+                <FileUploader onUpload={handleUpload} uploading={uploading} />
+              </div>
             </div>
             <div className={grid}>
-              {novels.map((novel) => (
+              {sortedNovels.map((novel) => (
                 <NovelCard key={novel.id} novel={novel} onDelete={removeNovel} />
               ))}
             </div>

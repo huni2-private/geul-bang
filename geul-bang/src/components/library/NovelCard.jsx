@@ -1,8 +1,8 @@
+// 서재 소설 카드 — 커버 이니셜 블록 + 진행률 바
 import { css } from 'styled-system/css'
 import { useNavigate } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 
-// 제목 문자열로 일관된 HSL 색상 생성
 function titleToHsl(str) {
   const hue = [...str].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0) % 360
   return `hsl(${hue}, 55%, 55%)`
@@ -12,21 +12,31 @@ const card = css({
   background: 'token(colors.bg.card)',
   border: '1px solid token(colors.border)',
   borderRadius: '10px',
-  padding: '16px 16px 16px 20px',
+  padding: '12px 16px 12px 12px',
   cursor: 'pointer',
   transition: 'box-shadow 0.15s',
-  position: 'relative',
-  overflow: 'hidden',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
   _hover: { boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
 })
 
-const accentBar = css({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  bottom: 0,
-  width: '4px',
-  borderRadius: '10px 0 0 10px',
+const cover = css({
+  width: '64px',
+  height: '80px',
+  borderRadius: '8px',
+  flexShrink: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '26px',
+  fontWeight: '700',
+  color: 'white',
+})
+
+const contentWrap = css({
+  flex: 1,
+  minWidth: 0,
 })
 
 const titleRow = css({
@@ -105,18 +115,22 @@ export default function NovelCard({ novel, onDelete }) {
 
   return (
     <div className={card} onClick={() => navigate(`/reader/${novel.id}`)}>
-      <div className={accentBar} style={{ background: accentColor }} />
-      <div className={titleRow}>
-        <span className={title}>📖 {novel.title}</span>
-        <button className={deleteBtn} onClick={handleDelete} title="삭제">
-          <Trash2 size={15} />
-        </button>
+      <div className={cover} style={{ background: accentColor }}>
+        {novel.title.charAt(0)}
       </div>
-      <p className={meta}>마지막: {formatDate(novel.lastReadAt)}</p>
-      <div className={barWrap}>
-        <div className={bar} style={{ width: `${pctVal}%`, background: accentColor }} />
+      <div className={contentWrap}>
+        <div className={titleRow}>
+          <span className={title}>{novel.title}</span>
+          <button className={deleteBtn} onClick={handleDelete} title="삭제">
+            <Trash2 size={15} />
+          </button>
+        </div>
+        <p className={meta}>마지막: {formatDate(novel.lastReadAt)}</p>
+        <div className={barWrap}>
+          <div className={bar} style={{ width: `${pctVal}%`, background: accentColor }} />
+        </div>
+        <p className={pct}>{pctVal}%</p>
       </div>
-      <p className={pct}>{pctVal}%</p>
     </div>
   )
 }
