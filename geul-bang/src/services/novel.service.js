@@ -21,10 +21,17 @@ function novelDoc(uid, novelId) {
 
 export function subscribeNovels(uid, callback) {
   const q = query(novelsRef(uid), orderBy('lastReadAt', 'desc'))
-  return onSnapshot(q, (snap) => {
-    const novels = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
-    callback(novels)
-  })
+  return onSnapshot(
+    q,
+    (snap) => {
+      const novels = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      callback(novels)
+    },
+    (error) => {
+      console.error('소설 목록 구독 실패:', error)
+      callback([])
+    },
+  )
 }
 
 export async function createNovel(uid, { title, fileUrl, storagePath, fileSize }) {
