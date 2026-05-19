@@ -1,10 +1,8 @@
 // 좌측 슬라이드인 네비게이션 드로어
 import { css } from 'styled-system/css'
-import { X, BookOpen, Info, User, Settings } from 'lucide-react'
+import { X, BookOpen, Info } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
-import { linkGoogle, loginWithGoogle, logOut } from '../../services/auth.service'
 
 const backdrop = css({
   position: 'fixed',
@@ -103,65 +101,6 @@ const themeChip = css({
   color: 'token(colors.text)',
 })
 
-const accountBox = css({
-  margin: '8px 20px 12px',
-  padding: '12px',
-  borderRadius: '8px',
-  background: 'token(colors.bg.subtle)',
-  border: '1px solid token(colors.border)',
-})
-
-const accountEmail = css({
-  fontSize: '13px',
-  fontWeight: '600',
-  color: 'token(colors.text)',
-  marginBottom: '2px',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-})
-
-const accountSub = css({
-  fontSize: '12px',
-  color: 'token(colors.text.muted)',
-  marginBottom: '10px',
-})
-
-const actionBtn = css({
-  display: 'block',
-  width: '100%',
-  padding: '7px 0',
-  borderRadius: '6px',
-  border: '1px solid token(colors.border)',
-  background: 'none',
-  cursor: 'pointer',
-  fontSize: '13px',
-  color: 'token(colors.text)',
-  transition: 'background 0.1s',
-  _hover: { background: 'token(colors.bg.card)' },
-})
-
-const primaryAction = css({
-  display: 'block',
-  width: '100%',
-  padding: '7px 0',
-  borderRadius: '6px',
-  border: 'none',
-  background: 'token(colors.accent)',
-  cursor: 'pointer',
-  fontSize: '13px',
-  fontWeight: '600',
-  color: '#fff',
-  transition: 'opacity 0.15s',
-  _hover: { opacity: 0.85 },
-})
-
-const anonWarn = css({
-  fontSize: '12px',
-  color: 'token(colors.text.muted)',
-  lineHeight: '1.5',
-  marginBottom: '10px',
-})
 
 const aboutText = css({
   padding: '12px 20px 20px',
@@ -178,33 +117,9 @@ const THEMES = [
 
 export default function NavDrawer({ open, onClose }) {
   const navigate = useNavigate()
-  const user = useAuth()
   const { theme, setTheme } = useTheme()
 
   if (!open) return null
-
-  async function handleLinkGoogle() {
-    try {
-      if (user?.isAnonymous) {
-        await linkGoogle()
-      } else {
-        await loginWithGoogle()
-      }
-    } catch (e) {
-      if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return
-      if (e.code === 'auth/credential-already-in-use') {
-        alert('이미 다른 계정에 연동된 Google 계정입니다.')
-        return
-      }
-      console.error('로그인 실패:', e)
-    }
-  }
-
-  async function handleLogOut() {
-    if (!confirm('로그아웃하면 익명 계정으로 전환됩니다. 계속하시겠어요?')) return
-    await logOut()
-    onClose()
-  }
 
   function goLibrary() {
     navigate('/')
@@ -228,30 +143,6 @@ export default function NavDrawer({ open, onClose }) {
             <BookOpen size={16} />
             내 서재
           </button>
-        </div>
-
-        {/* 계정 */}
-        <div className={section}>
-          <p className={sectionLabel}>계정</p>
-          <div className={accountBox}>
-            {user?.isAnonymous ? (
-              <>
-                <p className={anonWarn}>
-                  현재 익명으로 사용 중입니다.<br />
-                  Google 계정을 연동하면 소설과 진행률이 안전하게 보존됩니다.
-                </p>
-                <button className={primaryAction} onClick={handleLinkGoogle}>
-                  Google로 연동하기
-                </button>
-              </>
-            ) : (
-              <>
-                <p className={accountEmail}>{user?.displayName || user?.email || '사용자'}</p>
-                <p className={accountSub}>{user?.email}</p>
-                <button className={actionBtn} onClick={handleLogOut}>로그아웃</button>
-              </>
-            )}
-          </div>
         </div>
 
         {/* 앱 설정 */}

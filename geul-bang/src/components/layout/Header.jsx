@@ -1,10 +1,10 @@
 // 상단 고정 헤더 — 네비 드로어 + 계정 칩
 import { useState } from 'react'
 import { css } from 'styled-system/css'
-import { Menu, LogOut, Link2 } from 'lucide-react'
+import { Menu, LogOut, Link2, LogIn } from 'lucide-react'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
 import { useAuth } from '../../contexts/AuthContext'
-import { logOut, linkGoogle } from '../../services/auth.service'
+import { logOut, linkGoogle, loginWithGoogle } from '../../services/auth.service'
 import NavDrawer from './NavDrawer'
 
 const header = css({
@@ -180,6 +180,16 @@ export default function Header({ children }) {
     await logOut()
   }
 
+  async function handleLogin() {
+    setDropOpen(false)
+    try {
+      await loginWithGoogle()
+    } catch (e) {
+      if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return
+      console.error('로그인 실패:', e)
+    }
+  }
+
   async function handleLink() {
     setDropOpen(false)
     try {
@@ -187,7 +197,7 @@ export default function Header({ children }) {
     } catch (e) {
       if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return
       if (e.code === 'auth/credential-already-in-use') {
-        alert('이미 다른 계정에 연동된 Google 계정입니다.')
+        alert('이미 연동된 계정입니다. 아래 "로그인" 버튼을 사용해주세요.')
         return
       }
       console.error('계정 연동 실패:', e)
@@ -239,11 +249,15 @@ export default function Header({ children }) {
             {user?.isAnonymous ? (
               <>
                 <p className={dropName}>익명 사용자</p>
-                <p className={dropEmail}>Google 연동 시 데이터가 안전하게 보존됩니다.</p>
+                <p className={dropEmail}>Google 계정으로 로그인하면 소설과 진행률이 보존됩니다.</p>
                 <div className={dropDivider} />
-                <button className={`${dropAction} ${dropLink}`} onClick={handleLink}>
+                <button className={`${dropAction} ${dropLink}`} onClick={handleLogin}>
+                  <LogIn size={14} />
+                  Google로 로그인
+                </button>
+                <button className={`${dropAction}`} style={{ color: 'var(--colors-text-muted)', marginTop: '4px' }} onClick={handleLink}>
                   <Link2 size={14} />
-                  Google로 연동하기
+                  소설 유지하며 연동
                 </button>
               </>
             ) : (
