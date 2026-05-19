@@ -9,7 +9,7 @@ import Header from '../components/layout/Header'
 import ReaderSettings from '../components/reader/ReaderSettings'
 import PageControls from '../components/reader/PageControls'
 import ChapterDrawer from '../components/reader/ChapterDrawer'
-import { updateProgress } from '../services/novel.service'
+import { updateProgress, getChunks } from '../services/novel.service'
 import { detectChapters } from '../utils/chapter'
 import { css } from 'styled-system/css'
 import { ArrowLeft } from 'lucide-react'
@@ -100,8 +100,7 @@ export default function ReaderPage() {
       if (!snap.exists()) { navigate('/'); return }
       const data = { id: snap.id, ...snap.data() }
       setNovel(data)
-      const res = await fetch(data.fileUrl)
-      const txt = await res.text()
+      const txt = await getChunks(user.uid, novelId)
       setText(txt)
       setLoading(false)
     }

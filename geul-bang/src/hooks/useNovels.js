@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { subscribeNovels, createNovel, deleteNovel } from '../services/novel.service'
-import { uploadNovelFile, deleteNovelFile } from '../services/storage.service'
+import { subscribeNovels, createNovel, saveChunks, deleteChunks, deleteNovel } from '../services/novel.service'
 import { readFileAsText, getFileTitle } from '../utils/fileReader'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -13,7 +12,6 @@ export function useNovels() {
   useEffect(() => {
     if (!user) return
     setLoading(true)
-    // 10초 안에 Firestore 응답 없으면 강제로 로딩 해제
     const timeout = setTimeout(() => setLoading(false), 5000)
     const unsubscribe = subscribeNovels(user.uid, (data) => {
       clearTimeout(timeout)
@@ -32,14 +30,9 @@ export function useNovels() {
     try {
       const title = getFileTitle(file.name)
       const blob = await readFileAsText(file)
-      const tempId = crypto.randomUUID()
-      const { url, path } = await uploadNovelFile(user.uid, tempId, blob, title)
-      await createNovel(user.uid, {
-        title,
-        fileUrl: url,
-        storagePath: path,
-        fileSize: file.size,
-      })
+      const text = await blob.text()
+      const novelId = await createNovel(user.uid, { title, fileSize: file.size })
+      await saveChunks(user.uid, novelId, text)
     } finally {
       setUploading(false)
     }
@@ -47,7 +40,7 @@ export function useNovels() {
 
   async function removeNovel(novel) {
     if (!user) return
-    await deleteNovelFile(novel.storagePath)
+    await deleteChunks(user.uid, novel.id)
     await deleteNovel(user.uid, novel.id)
   }
 
