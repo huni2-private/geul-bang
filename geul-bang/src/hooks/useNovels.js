@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { subscribeNovels, createNovel, deleteNovel } from '../services/novel.service'
 import { uploadNovelFile, deleteNovelFile } from '../services/storage.service'
-import { readFileAsUTF8 } from '../utils/encoding'
+import { readFileAsText, getFileTitle } from '../utils/fileReader'
 import { useAuth } from '../contexts/AuthContext'
 
 export function useNovels() {
@@ -24,8 +24,8 @@ export function useNovels() {
     if (!user || uploading) return
     setUploading(true)
     try {
-      const title = file.name.replace(/\.txt$/i, '')
-      const blob = await readFileAsUTF8(file)
+      const title = getFileTitle(file.name)
+      const blob = await readFileAsText(file)
       const tempId = crypto.randomUUID()
       const { url, path } = await uploadNovelFile(user.uid, tempId, blob, title)
       await createNovel(user.uid, {

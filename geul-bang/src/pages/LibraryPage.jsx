@@ -309,7 +309,7 @@ export default function LibraryPage() {
               <div className={steps}>
                 <div className={stepItem}>
                   <span className={stepNum}>1</span>
-                  상단 <strong>소설 추가</strong> 버튼을 눌러 .txt 파일을 선택하세요.
+                  상단 <strong>소설 추가</strong> 버튼으로 .txt · .pdf · .docx 파일을 선택하세요.
                 </div>
                 <div className={stepItem}>
                   <span className={stepNum}>2</span>

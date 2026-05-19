@@ -35,7 +35,7 @@ export default function FileUploader({ onUpload, uploading }) {
       <input
         ref={inputRef}
         type="file"
-        accept=".txt"
+        accept=".txt,.pdf,.docx,.doc"
         style={{ display: 'none' }}
         onChange={handleChange}
       />
