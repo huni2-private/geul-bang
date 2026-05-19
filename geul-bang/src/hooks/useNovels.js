@@ -14,7 +14,7 @@ export function useNovels() {
     if (!user) return
     setLoading(true)
     // 10초 안에 Firestore 응답 없으면 강제로 로딩 해제
-    const timeout = setTimeout(() => setLoading(false), 10000)
+    const timeout = setTimeout(() => setLoading(false), 5000)
     const unsubscribe = subscribeNovels(user.uid, (data) => {
       clearTimeout(timeout)
       setNovels(data)

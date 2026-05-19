@@ -97,8 +97,9 @@ const emptyWrap = css({
 })
 
 const emptyIcon = css({
-  fontSize: '48px',
-  lineHeight: 1,
+  width: '72px',
+  height: '72px',
+  objectFit: 'contain',
   marginBottom: '4px',
 })
 
@@ -247,7 +248,7 @@ export default function LibraryPage() {
         ) : novels.length === 0 ? (
           // ── 빈 서재 ──
           <div className={emptyWrap}>
-            <span className={emptyIcon}>📚</span>
+            <img src="/geulbang.png" className={emptyIcon} alt="글방" />
             <p className={emptyTitle}>서재가 비어있어요</p>
             <p className={emptyDesc}>.txt · .pdf · .docx 파일을 추가해보세요</p>
             <FileUploader onUpload={handleUpload} uploading={uploading} />
