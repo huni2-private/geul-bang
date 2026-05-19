@@ -116,10 +116,11 @@ const hero = css({
 })
 
 const heroIcon = css({
-  fontSize: '48px',
   display: 'block',
-  marginBottom: '20px',
-  lineHeight: 1,
+  width: '80px',
+  height: '80px',
+  margin: '0 auto 20px',
+  objectFit: 'contain',
 })
 
 const heroTitle = css({
@@ -273,7 +274,7 @@ export default function LibraryPage() {
           // ── 빈 서재: 온보딩 화면 ──
           <div className={onboarding}>
             <div className={hero}>
-              <span className={heroIcon}>📚</span>
+              <img src="/geulbang.png" className={heroIcon} alt="글방" />
               <h1 className={heroTitle}>나만의 웹소설 리더</h1>
               <p className={heroDesc}>
                 .txt 파일을 올리면 기기에 상관없이 어디서든 이어 읽을 수 있어요.<br />
