@@ -173,6 +173,46 @@ export default function ReaderSettings({ settings, onChange }) {
                 ))}
               </div>
             </div>
+
+            <div className={section}>
+              <p className={label}>줄간격</p>
+              <div className={btnRow}>
+                {[{ key: 1.5, label: '좁게' }, { key: 1.9, label: '보통' }, { key: 2.3, label: '넓게' }].map((l) => (
+                  <button
+                    key={l.key}
+                    className={optBtn}
+                    style={{
+                      borderColor: settings.lineHeight === l.key ? 'var(--colors-accent)' : undefined,
+                      borderWidth: settings.lineHeight === l.key ? '2px' : undefined,
+                      fontWeight: settings.lineHeight === l.key ? '600' : undefined,
+                    }}
+                    onClick={() => onChange({ lineHeight: l.key })}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={section}>
+              <p className={label}>좌우 여백</p>
+              <div className={btnRow}>
+                {[{ key: 'narrow', label: '좁음' }, { key: 'normal', label: '보통' }, { key: 'wide', label: '넓음' }].map((p) => (
+                  <button
+                    key={p.key}
+                    className={optBtn}
+                    style={{
+                      borderColor: settings.padding === p.key ? 'var(--colors-accent)' : undefined,
+                      borderWidth: settings.padding === p.key ? '2px' : undefined,
+                      fontWeight: settings.padding === p.key ? '600' : undefined,
+                    }}
+                    onClick={() => onChange({ padding: p.key })}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </>
       )}

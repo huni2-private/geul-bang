@@ -15,7 +15,9 @@ import { css } from 'styled-system/css'
 import { ArrowLeft } from 'lucide-react'
 
 const SETTINGS_KEY = 'geulbang_settings'
-const DEFAULT_SETTINGS = { fontSize: 18, theme: 'light', mode: 'scroll', font: 'serif' }
+const DEFAULT_SETTINGS = { fontSize: 18, theme: 'light', mode: 'scroll', font: 'serif', lineHeight: 1.9, padding: 'normal' }
+
+const PADDING_MAP = { narrow: 16, normal: 24, wide: 40 }
 
 const FONT_FAMILIES = {
   serif: 'var(--fonts-reader)',
@@ -76,8 +78,8 @@ const pageWrap = css({
 const scrollContent = css({
   maxWidth: '680px',
   margin: '0 auto',
-  padding: { base: '76px 16px 60px', sm: '88px 24px 80px' },
-  lineHeight: '1.9',
+  paddingTop: { base: '76px', sm: '88px' },
+  paddingBottom: { base: '60px', sm: '80px' },
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-all',
 })
@@ -139,6 +141,7 @@ export default function ReaderPage() {
       text,
       fontSize: settings.fontSize,
       initialProgress: novel?.progressRatio ?? 0,
+      hPad: (PADDING_MAP[settings.padding] ?? 24) * 2,
     })
 
   // Save progress on page turn
@@ -220,12 +223,12 @@ export default function ReaderPage() {
             ref={columnRef}
             style={{
               height: '100%',
-              padding: '0 24px',
+              padding: `0 ${PADDING_MAP[settings.padding] ?? 24}px`,
               columnFill: 'auto',
               columnGap: 0,
               columnWidth: colWidth,
               fontSize: `${settings.fontSize}px`,
-              lineHeight: '1.9',
+              lineHeight: settings.lineHeight,
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-all',
               fontFamily,
@@ -246,7 +249,13 @@ export default function ReaderPage() {
       ) : (
         <div
           className={scrollContent}
-          style={{ fontSize: `${settings.fontSize}px`, fontFamily }}
+          style={{
+            fontSize: `${settings.fontSize}px`,
+            fontFamily,
+            lineHeight: settings.lineHeight,
+            paddingLeft: `${PADDING_MAP[settings.padding] ?? 24}px`,
+            paddingRight: `${PADDING_MAP[settings.padding] ?? 24}px`,
+          }}
         >
           {text}
         </div>
