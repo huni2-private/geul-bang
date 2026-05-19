@@ -246,7 +246,9 @@ export default function LibraryPage() {
   return (
     <div className={wrap}>
       {showLinkModal && <LinkAccountModal onClose={() => setShowLinkModal(false)} />}
-      <Header />
+      <Header>
+        <FileUploader onUpload={handleUpload} uploading={uploading} />
+      </Header>
       <AccountBanner />
       {canInstall && (
         <div className={installBanner}>
@@ -302,18 +304,15 @@ export default function LibraryPage() {
           <>
             <div className={topRow}>
               <h1 className={heading}>내 서재</h1>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <select
-                  className={sortSelect}
-                  value={sortOrder}
-                  onChange={(e) => handleSortChange(e.target.value)}
-                >
-                  {SORT_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-                <FileUploader onUpload={handleUpload} uploading={uploading} />
-              </div>
+              <select
+                className={sortSelect}
+                value={sortOrder}
+                onChange={(e) => handleSortChange(e.target.value)}
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
             </div>
             <div className={grid}>
               {sortedNovels.map((novel) => (
