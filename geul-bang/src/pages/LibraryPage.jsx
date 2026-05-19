@@ -1,6 +1,7 @@
-// 서재 페이지 — 소설 목록, 정렬, 스켈레톤 로딩
+// 서재 페이지 — 소설 목록, 검색/정렬, 스켈레톤 로딩
 import { useState, useMemo } from 'react'
 import { css } from 'styled-system/css'
+import { Search } from 'lucide-react'
 import Header from '../components/layout/Header'
 import AccountBanner from '../components/auth/AccountBanner'
 import NovelCard from '../components/library/NovelCard'
@@ -16,6 +17,8 @@ const SORT_OPTIONS = [
   { value: 'title', label: '제목 순' },
   { value: 'progress', label: '진행률 순' },
 ]
+
+// ── 레이아웃 ────────────────────────────────────────────────
 
 const wrap = css({
   paddingTop: '56px',
@@ -62,36 +65,7 @@ const inner = css({
   padding: { base: '24px 16px', sm: '32px 20px' },
 })
 
-const topRow = css({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: '24px',
-  gap: '12px',
-  flexWrap: 'wrap',
-})
-
-const heading = css({
-  fontSize: { base: '18px', sm: '22px' },
-  fontWeight: '700',
-  color: 'token(colors.text)',
-})
-
-const sortSelect = css({
-  fontSize: '13px',
-  padding: '4px 8px',
-  borderRadius: '6px',
-  border: '1px solid token(colors.border)',
-  background: 'token(colors.bg.card)',
-  color: 'token(colors.text)',
-  cursor: 'pointer',
-})
-
-const grid = css({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '12px',
-})
+// ── 스켈레톤 ─────────────────────────────────────────────────
 
 const skeletonCard = css({
   background: 'token(colors.bg.card)',
@@ -104,128 +78,97 @@ const skeletonCard = css({
   opacity: 0.5,
 })
 
-// ── 온보딩 빈 상태 ──────────────────────────────────────────
-
-const onboarding = css({
-  padding: { base: '40px 0 60px', sm: '56px 0 80px' },
-})
-
-const hero = css({
-  textAlign: 'center',
-  marginBottom: '40px',
-})
-
-const heroTitle = css({
-  fontSize: { base: '22px', sm: '26px' },
-  fontWeight: '700',
-  color: 'token(colors.text)',
-  marginBottom: '10px',
-  letterSpacing: '-0.5px',
-})
-
-const heroDesc = css({
-  fontSize: { base: '14px', sm: '15px' },
-  color: 'token(colors.text.muted)',
-  lineHeight: '1.7',
-  marginBottom: '28px',
-})
-
-const steps = css({
+const grid = css({
   display: 'flex',
   flexDirection: 'column',
-  gap: '10px',
-  marginBottom: '28px',
-  textAlign: 'left',
-})
-
-const stepItem = css({
-  display: 'flex',
-  alignItems: 'center',
   gap: '12px',
-  padding: '12px 16px',
-  borderRadius: '10px',
-  background: 'token(colors.bg.subtle)',
-  border: '1px solid token(colors.border)',
-  fontSize: '14px',
-  color: 'token(colors.text)',
 })
 
-const stepNum = css({
-  width: '24px',
-  height: '24px',
-  borderRadius: '50%',
-  background: 'token(colors.accent)',
-  color: '#fff',
-  fontSize: '12px',
-  fontWeight: '700',
+// ── 빈 서재 ─────────────────────────────────────────────────
+
+const emptyWrap = css({
   display: 'flex',
+  flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  flexShrink: 0,
-})
-
-const divider = css({
-  borderTop: '1px solid token(colors.border)',
-  margin: '40px 0',
-})
-
-const featureGrid = css({
-  display: 'grid',
-  gridTemplateColumns: { base: '1fr', sm: '1fr 1fr' },
-  gap: '16px',
-})
-
-const featureItem = css({
-  display: 'flex',
+  padding: '80px 0 60px',
   gap: '12px',
-  alignItems: 'flex-start',
-  padding: '16px',
-  borderRadius: '10px',
-  background: 'token(colors.bg.subtle)',
-  border: '1px solid token(colors.border)',
+  textAlign: 'center',
 })
 
-const featureDot = css({
-  width: '8px',
-  height: '8px',
-  borderRadius: '50%',
-  background: 'token(colors.accent)',
-  marginTop: '6px',
-  flexShrink: 0,
-})
-
-const featureName = css({
-  fontSize: '14px',
-  fontWeight: '600',
-  color: 'token(colors.text)',
-  display: 'block',
+const emptyIcon = css({
+  fontSize: '48px',
+  lineHeight: 1,
   marginBottom: '4px',
 })
 
-const featureDesc = css({
-  fontSize: '13px',
-  color: 'token(colors.text.muted)',
-  lineHeight: '1.5',
+const emptyTitle = css({
+  fontSize: { base: '18px', sm: '20px' },
+  fontWeight: '700',
+  color: 'token(colors.text)',
+  letterSpacing: '-0.3px',
 })
 
-const FEATURES = [
-  {
-    name: 'EUC-KR 자동 변환',
-    desc: '한국 웹소설 .txt 파일의 깨진 글자를 자동으로 변환합니다.',
-  },
-  {
-    name: '이어 읽기',
-    desc: '읽던 위치를 자동으로 저장해 다음에 그대로 이어 읽습니다.',
-  },
-  {
-    name: '테마·글자 크기',
-    desc: '라이트·다크·세피아 테마와 글자 크기를 자유롭게 조절합니다.',
-  },
-  {
-    name: '클라우드 동기',
-    desc: 'Google 계정을 연동하면 다른 기기에서도 같은 서재를 씁니다.',
-  },
-]
+const emptyDesc = css({
+  fontSize: '13px',
+  color: 'token(colors.text.muted)',
+  marginBottom: '8px',
+})
+
+// ── 소설 목록 툴바 ───────────────────────────────────────────
+
+const toolbar = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  marginBottom: '16px',
+})
+
+const searchWrap = css({
+  position: 'relative',
+  flex: 1,
+})
+
+const searchIcon = css({
+  position: 'absolute',
+  left: '10px',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  color: 'token(colors.text.muted)',
+  pointerEvents: 'none',
+})
+
+const searchInput = css({
+  width: '100%',
+  padding: '8px 12px 8px 32px',
+  borderRadius: '8px',
+  border: '1px solid token(colors.border)',
+  background: 'token(colors.bg.card)',
+  color: 'token(colors.text)',
+  fontSize: '14px',
+  outline: 'none',
+  transition: 'border-color 0.15s',
+  _focus: { borderColor: 'token(colors.accent)' },
+})
+
+const sortSelect = css({
+  fontSize: '13px',
+  padding: '8px 8px',
+  borderRadius: '8px',
+  border: '1px solid token(colors.border)',
+  background: 'token(colors.bg.card)',
+  color: 'token(colors.text)',
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+  flexShrink: 0,
+})
+
+const noResult = css({
+  textAlign: 'center',
+  padding: '40px 0',
+  fontSize: '14px',
+  color: 'token(colors.text.muted)',
+})
 
 export default function LibraryPage() {
   const user = useAuth()
@@ -234,6 +177,7 @@ export default function LibraryPage() {
   const [sortOrder, setSortOrder] = useState(() =>
     localStorage.getItem(SORT_KEY) || 'lastRead'
   )
+  const [searchQuery, setSearchQuery] = useState('')
   const { canInstall, install } = usePWAInstall()
 
   async function handleUpload(file) {
@@ -246,20 +190,23 @@ export default function LibraryPage() {
     localStorage.setItem(SORT_KEY, value)
   }
 
-  const sortedNovels = useMemo(() => {
+  const displayedNovels = useMemo(() => {
     const list = [...novels]
+    // 정렬
     if (sortOrder === 'title') {
-      return list.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'ko'))
+      list.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'ko'))
+    } else if (sortOrder === 'progress') {
+      list.sort((a, b) => (b.progressRatio || 0) - (a.progressRatio || 0))
+    } else {
+      list.sort((a, b) => {
+        const toMs = (ts) => ts?.toMillis ? ts.toMillis() : ts ? new Date(ts).getTime() : 0
+        return toMs(b.lastReadAt) - toMs(a.lastReadAt)
+      })
     }
-    if (sortOrder === 'progress') {
-      return list.sort((a, b) => (b.progressRatio || 0) - (a.progressRatio || 0))
-    }
-    // lastRead: lastReadAt 내림차순, null은 뒤로
-    return list.sort((a, b) => {
-      const toMs = (ts) => ts?.toMillis ? ts.toMillis() : ts ? new Date(ts).getTime() : 0
-      return toMs(b.lastReadAt) - toMs(a.lastReadAt)
-    })
-  }, [novels, sortOrder])
+    // 검색 필터
+    const q = searchQuery.trim().toLowerCase()
+    return q ? list.filter((n) => n.title.toLowerCase().includes(q)) : list
+  }, [novels, sortOrder, searchQuery])
 
   if (!user) {
     return (
@@ -272,9 +219,7 @@ export default function LibraryPage() {
   return (
     <div className={wrap}>
       {showLinkModal && <LinkAccountModal onClose={() => setShowLinkModal(false)} />}
-      <Header>
-        <FileUploader onUpload={handleUpload} uploading={uploading} />
-      </Header>
+      <Header />
       <AccountBanner />
       {canInstall && (
         <div className={installBanner}>
@@ -298,50 +243,30 @@ export default function LibraryPage() {
               </div>
             ))}
           </div>
+
         ) : novels.length === 0 ? (
-          // ── 빈 서재: 온보딩 화면 ──
-          <div className={onboarding}>
-            <div className={hero}>
-              <h1 className={heroTitle}>글방 사용 방법</h1>
-              <p className={heroDesc}>
-                한국 웹소설 .txt 파일을 올리면 어디서든 이어 읽을 수 있어요.
-              </p>
-              <div className={steps}>
-                <div className={stepItem}>
-                  <span className={stepNum}>1</span>
-                  상단 <strong>소설 추가</strong> 버튼으로 .txt · .pdf · .docx 파일을 선택하세요.
-                </div>
-                <div className={stepItem}>
-                  <span className={stepNum}>2</span>
-                  목록에서 읽고 싶은 소설을 탭하면 뷰어가 열립니다.
-                </div>
-                <div className={stepItem}>
-                  <span className={stepNum}>3</span>
-                  읽던 위치가 자동 저장되어 다음에 그대로 이어 읽습니다.
-                </div>
-              </div>
-              <FileUploader onUpload={handleUpload} uploading={uploading} />
-            </div>
-
-            <hr className={divider} />
-
-            <div className={featureGrid}>
-              {FEATURES.map((f) => (
-                <div key={f.name} className={featureItem}>
-                  <span className={featureDot} />
-                  <div>
-                    <span className={featureName}>{f.name}</span>
-                    <span className={featureDesc}>{f.desc}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+          // ── 빈 서재 ──
+          <div className={emptyWrap}>
+            <span className={emptyIcon}>📚</span>
+            <p className={emptyTitle}>서재가 비어있어요</p>
+            <p className={emptyDesc}>.txt · .pdf · .docx 파일을 추가해보세요</p>
+            <FileUploader onUpload={handleUpload} uploading={uploading} />
           </div>
+
         ) : (
           // ── 소설 목록 ──
           <>
-            <div className={topRow}>
-              <h1 className={heading}>내 서재</h1>
+            <div className={toolbar}>
+              <div className={searchWrap}>
+                <Search size={14} className={searchIcon} />
+                <input
+                  type="search"
+                  className={searchInput}
+                  placeholder="소설 검색..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
               <select
                 className={sortSelect}
                 value={sortOrder}
@@ -351,12 +276,18 @@ export default function LibraryPage() {
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
+              <FileUploader onUpload={handleUpload} uploading={uploading} />
             </div>
-            <div className={grid}>
-              {sortedNovels.map((novel) => (
-                <NovelCard key={novel.id} novel={novel} onDelete={removeNovel} />
-              ))}
-            </div>
+
+            {displayedNovels.length === 0 ? (
+              <p className={noResult}>"{searchQuery}"에 대한 검색 결과가 없습니다.</p>
+            ) : (
+              <div className={grid}>
+                {displayedNovels.map((novel) => (
+                  <NovelCard key={novel.id} novel={novel} onDelete={removeNovel} />
+                ))}
+              </div>
+            )}
           </>
         )}
 
