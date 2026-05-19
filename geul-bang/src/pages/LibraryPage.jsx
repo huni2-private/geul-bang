@@ -112,22 +112,14 @@ const onboarding = css({
 
 const hero = css({
   textAlign: 'center',
-  marginBottom: '48px',
-})
-
-const heroIcon = css({
-  display: 'block',
-  width: '80px',
-  height: '80px',
-  margin: '0 auto 20px',
-  objectFit: 'contain',
+  marginBottom: '40px',
 })
 
 const heroTitle = css({
   fontSize: { base: '22px', sm: '26px' },
   fontWeight: '700',
   color: 'token(colors.text)',
-  marginBottom: '12px',
+  marginBottom: '10px',
   letterSpacing: '-0.5px',
 })
 
@@ -136,6 +128,40 @@ const heroDesc = css({
   color: 'token(colors.text.muted)',
   lineHeight: '1.7',
   marginBottom: '28px',
+})
+
+const steps = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+  marginBottom: '28px',
+  textAlign: 'left',
+})
+
+const stepItem = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  padding: '12px 16px',
+  borderRadius: '10px',
+  background: 'token(colors.bg.subtle)',
+  border: '1px solid token(colors.border)',
+  fontSize: '14px',
+  color: 'token(colors.text)',
+})
+
+const stepNum = css({
+  width: '24px',
+  height: '24px',
+  borderRadius: '50%',
+  background: 'token(colors.accent)',
+  color: '#fff',
+  fontSize: '12px',
+  fontWeight: '700',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
 })
 
 const divider = css({
@@ -276,12 +302,24 @@ export default function LibraryPage() {
           // ── 빈 서재: 온보딩 화면 ──
           <div className={onboarding}>
             <div className={hero}>
-              <img src="/geulbang.png" className={heroIcon} alt="글방" />
-              <h1 className={heroTitle}>나만의 웹소설 리더</h1>
+              <h1 className={heroTitle}>글방 사용 방법</h1>
               <p className={heroDesc}>
-                .txt 파일을 올리면 기기에 상관없이 어디서든 이어 읽을 수 있어요.<br />
-                EUC-KR 인코딩도 자동으로 변환해 드립니다.
+                한국 웹소설 .txt 파일을 올리면 어디서든 이어 읽을 수 있어요.
               </p>
+              <div className={steps}>
+                <div className={stepItem}>
+                  <span className={stepNum}>1</span>
+                  상단 <strong>소설 추가</strong> 버튼을 눌러 .txt 파일을 선택하세요.
+                </div>
+                <div className={stepItem}>
+                  <span className={stepNum}>2</span>
+                  목록에서 읽고 싶은 소설을 탭하면 뷰어가 열립니다.
+                </div>
+                <div className={stepItem}>
+                  <span className={stepNum}>3</span>
+                  읽던 위치가 자동 저장되어 다음에 그대로 이어 읽습니다.
+                </div>
+              </div>
               <FileUploader onUpload={handleUpload} uploading={uploading} />
             </div>
 
