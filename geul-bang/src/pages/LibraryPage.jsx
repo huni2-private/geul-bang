@@ -179,11 +179,18 @@ export default function LibraryPage() {
     localStorage.getItem(SORT_KEY) || 'lastRead'
   )
   const [searchQuery, setSearchQuery] = useState('')
+  const [uploadError, setUploadError] = useState(null)
   const { canInstall, install } = usePWAInstall()
 
   async function handleUpload(file) {
-    await uploadNovel(file)
-    if (user?.isAnonymous) setShowLinkModal(true)
+    setUploadError(null)
+    try {
+      await uploadNovel(file)
+      if (user?.isAnonymous) setShowLinkModal(true)
+    } catch (e) {
+      console.error('업로드 실패:', e)
+      setUploadError(e.message || '업로드 중 오류가 발생했습니다.')
+    }
   }
 
   function handleSortChange(value) {
@@ -229,6 +236,11 @@ export default function LibraryPage() {
         </div>
       )}
       <div className={inner}>
+        {uploadError && (
+          <div style={{ padding: '10px 14px', marginBottom: '12px', borderRadius: '8px', background: 'var(--colors-error-subtle)', color: 'var(--colors-error)', fontSize: '13px' }}>
+            업로드 실패: {uploadError}
+          </div>
+        )}
 
         {loading ? (
           // ── 스켈레톤 ──

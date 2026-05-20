@@ -210,6 +210,19 @@ export default function ReaderPage() {
     )
   }
 
+  if (!text) {
+    return (
+      <div
+        className={pageWrap}
+        data-theme={dataTheme}
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+      >
+        <span style={{ fontSize: '14px', opacity: 0.6 }}>내용을 찾을 수 없습니다.</span>
+        <span style={{ fontSize: '12px', opacity: 0.4 }}>소설을 삭제 후 다시 업로드해 주세요.</span>
+      </div>
+    )
+  }
+
   return (
     <div className={pageWrap} data-theme={dataTheme}>
       {!isPageMode && (
