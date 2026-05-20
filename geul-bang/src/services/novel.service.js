@@ -10,6 +10,7 @@ import {
   orderBy,
   writeBatch,
   serverTimestamp,
+  // orderBy는 subscribeNovels에서만 사용
 } from 'firebase/firestore'
 import { db } from './firebase'
 
@@ -60,8 +61,10 @@ export async function saveChunks(uid, novelId, text) {
   const ref = chunksRef(uid, novelId)
   let count = 0
   for (let i = 0; i * CHUNK_SIZE < text.length; i++) {
+    // zero-padding ID → orderBy 없이 lexicographic 정렬 가능
+    const id = String(i).padStart(8, '0')
     const chunk = text.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)
-    batch.set(doc(ref, String(i)), { text: chunk, index: i })
+    batch.set(doc(ref, id), { text: chunk })
     count++
   }
   await batch.commit()
@@ -69,8 +72,10 @@ export async function saveChunks(uid, novelId, text) {
 }
 
 export async function getChunks(uid, novelId) {
-  const snap = await getDocs(query(chunksRef(uid, novelId), orderBy('index')))
-  return snap.docs.map((d) => d.data().text).join('')
+  // orderBy 없이 document ID 순서로 조회 (zero-padded ID라 정렬 보장)
+  const snap = await getDocs(chunksRef(uid, novelId))
+  const sorted = snap.docs.sort((a, b) => a.id.localeCompare(b.id))
+  return sorted.map((d) => d.data().text).join('')
 }
 
 export async function deleteChunks(uid, novelId) {

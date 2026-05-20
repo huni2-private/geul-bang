@@ -91,18 +91,25 @@ export default function ReaderPage() {
   const [novel, setNovel] = useState(null)
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(null)
   const [settings, setSettings] = useState(loadSettings)
 
   useEffect(() => {
     if (!user || !novelId) return
     async function load() {
-      const snap = await getDoc(doc(db, 'users', user.uid, 'novels', novelId))
-      if (!snap.exists()) { navigate('/'); return }
-      const data = { id: snap.id, ...snap.data() }
-      setNovel(data)
-      const txt = await getChunks(user.uid, novelId)
-      setText(txt)
-      setLoading(false)
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid, 'novels', novelId))
+        if (!snap.exists()) { navigate('/'); return }
+        const data = { id: snap.id, ...snap.data() }
+        setNovel(data)
+        const txt = await getChunks(user.uid, novelId)
+        setText(txt)
+      } catch (e) {
+        console.error('소설 불러오기 실패:', e)
+        setLoadError(e.message || '불러오기 실패')
+      } finally {
+        setLoading(false)
+      }
     }
     load()
   }, [user, novelId, navigate])
@@ -186,6 +193,19 @@ export default function ReaderPage() {
         style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
       >
         <span style={{ fontSize: '14px', opacity: 0.5 }}>불러오는 중...</span>
+      </div>
+    )
+  }
+
+  if (loadError) {
+    return (
+      <div
+        className={pageWrap}
+        data-theme={dataTheme}
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+      >
+        <span style={{ fontSize: '14px', color: 'var(--colors-error)' }}>소설을 불러오지 못했습니다.</span>
+        <span style={{ fontSize: '12px', opacity: 0.5 }}>{loadError}</span>
       </div>
     )
   }
