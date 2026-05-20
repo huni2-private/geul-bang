@@ -186,7 +186,7 @@ const noResult = css({
 
 export default function LibraryPage() {
   const user = useAuth()
-  const { novels, loading, uploading, uploadNovel, removeNovel } = useNovels()
+  const { novels, loading, uploading, dbError, uploadNovel, removeNovel } = useNovels()
   const showToast = useToast()
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [uploadStep, setUploadStep] = useState('')
@@ -295,6 +295,27 @@ export default function LibraryPage() {
                 </div>
               </div>
             ))}
+          </div>
+
+        ) : dbError ? (
+          // ── DB 연결 오류 ──
+          <div className={emptyWrap}>
+            <div style={{ fontSize: 40 }}>⚠️</div>
+            <p className={emptyTitle}>데이터베이스에 연결할 수 없어요</p>
+            <p className={emptyDesc} style={{ textAlign: 'center', lineHeight: 1.7 }}>
+              오류: <strong>{dbError.code || dbError.message}</strong><br />
+              페이지를 새로고침하거나 잠시 후 다시 시도해주세요.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                padding: '10px 24px', borderRadius: 8,
+                background: 'var(--colors-accent)', color: '#fff',
+                border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              새로고침
+            </button>
           </div>
 
         ) : novels.length === 0 && !uploading ? (

@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { subscribeNovels, createNovel, saveChunks, deleteChunks, deleteNovel } from '../services/novel.service'
 import { readFileAsText, getFileTitle } from '../utils/fileReader'
 import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
 
 // 페이지 재방문 시 스켈레톤 없이 즉시 표시하기 위한 모듈 캐시
 const novelsCache = {}
@@ -9,13 +10,15 @@ const novelsCache = {}
 export function useNovels() {
   const user = useAuth()
   const uid = user?.uid
+  const showToast = useToast()
   const [novels, setNovels] = useState([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [dbError, setDbError] = useState(null)
 
   useEffect(() => {
     if (!uid) return
-    // 캐시가 있으면 즉시 표시 (스켈레톤 없음)
+    setDbError(null)
     if (novelsCache[uid] !== undefined) {
       setNovels(novelsCache[uid])
       setLoading(false)
@@ -23,8 +26,12 @@ export function useNovels() {
       setLoading(true)
     }
     const timeout = setTimeout(() => setLoading(false), 5000)
-    const unsubscribe = subscribeNovels(uid, (data) => {
+    const unsubscribe = subscribeNovels(uid, (data, error) => {
       clearTimeout(timeout)
+      if (error) {
+        setDbError(error)
+        showToast?.(`데이터베이스 연결 오류: ${error.code || error.message}`, 'error', 10000)
+      }
       novelsCache[uid] = data
       setNovels(data)
       setLoading(false)
@@ -33,7 +40,7 @@ export function useNovels() {
       clearTimeout(timeout)
       unsubscribe()
     }
-  }, [uid])
+  }, [uid, showToast])
 
   // onStep: (msg: string) => void — 단계별 진행 상태를 UI에 전달
   async function uploadNovel(file, onStep) {
@@ -69,5 +76,5 @@ export function useNovels() {
     await deleteNovel(uid, novel.id)
   }
 
-  return { novels, loading, uploading, uploadNovel, removeNovel }
+  return { novels, loading, uploading, dbError, uploadNovel, removeNovel }
 }

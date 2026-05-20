@@ -26,16 +26,15 @@ function chunksRef(uid, novelId) {
 }
 
 export function subscribeNovels(uid, callback) {
-  // orderBy를 제거해 Firestore 인덱스 의존 없이 동작 — 정렬은 LibraryPage에서 처리
   return onSnapshot(
     novelsRef(uid),
     (snap) => {
       const novels = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
-      callback(novels)
+      callback(novels, null)
     },
     (error) => {
       console.error('소설 목록 구독 실패:', error)
-      callback([])
+      callback([], error)
     },
   )
 }
