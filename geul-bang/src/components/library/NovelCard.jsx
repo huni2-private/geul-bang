@@ -1,4 +1,5 @@
 // 서재 소설 카드 — 커버 이니셜 블록 + 진행률 바
+import { useState } from 'react'
 import { css } from 'styled-system/css'
 import { useNavigate } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
@@ -98,6 +99,42 @@ const deleteBtn = css({
   _hover: { color: '#ef4444', background: '#fee2e2' },
 })
 
+const confirmRow = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  justifyContent: 'flex-end',
+})
+
+const confirmMsg = css({
+  fontSize: '12px',
+  color: 'token(colors.text.muted)',
+  flex: 1,
+})
+
+const cancelBtn = css({
+  fontSize: '12px',
+  padding: '3px 10px',
+  borderRadius: '6px',
+  border: '1px solid token(colors.border)',
+  background: 'token(colors.bg.card)',
+  color: 'token(colors.text.muted)',
+  cursor: 'pointer',
+  _hover: { background: 'token(colors.bg.subtle)' },
+})
+
+const confirmBtn = css({
+  fontSize: '12px',
+  padding: '3px 10px',
+  borderRadius: '6px',
+  border: 'none',
+  background: '#ef4444',
+  color: '#fff',
+  cursor: 'pointer',
+  fontWeight: '600',
+  _hover: { background: '#dc2626' },
+})
+
 function formatDate(ts) {
   if (!ts) return ''
   const d = ts.toDate ? ts.toDate() : new Date(ts)
@@ -106,33 +143,54 @@ function formatDate(ts) {
 
 export default function NovelCard({ novel, onDelete }) {
   const navigate = useNavigate()
+  const [confirming, setConfirming] = useState(false)
   const pctVal = Math.round((novel.progressRatio || 0) * 100)
   const { gradient, solid } = titleColors(novel.title || '')
 
-  function handleDelete(e) {
+  function handleDeleteClick(e) {
     e.stopPropagation()
-    if (confirm(`"${novel.title}"을(를) 삭제하면 복구할 수 없습니다. 계속하시겠어요?`)) {
-      onDelete(novel)
-    }
+    setConfirming(true)
+  }
+
+  function handleCancel(e) {
+    e.stopPropagation()
+    setConfirming(false)
+  }
+
+  function handleConfirm(e) {
+    e.stopPropagation()
+    onDelete(novel)
   }
 
   return (
-    <div className={card} onClick={() => navigate(`/reader/${novel.id}`)}>
+    <div className={card} onClick={() => !confirming && navigate(`/reader/${novel.id}`)}>
       <div className={cover} style={{ background: gradient }}>
         {novel.title.charAt(0)}
       </div>
       <div className={contentWrap}>
         <div className={titleRow}>
           <span className={title}>{novel.title}</span>
-          <button className={deleteBtn} onClick={handleDelete} title="삭제">
-            <Trash2 size={15} />
-          </button>
+          {!confirming && (
+            <button className={deleteBtn} onClick={handleDeleteClick} title="삭제">
+              <Trash2 size={15} />
+            </button>
+          )}
         </div>
-        <p className={meta}>마지막: {formatDate(novel.lastReadAt)}</p>
-        <div className={barWrap}>
-          <div className={bar} style={{ width: `${pctVal}%`, background: solid }} />
-        </div>
-        <p className={pct}>{pctVal}%</p>
+        {confirming ? (
+          <div className={confirmRow}>
+            <span className={confirmMsg}>삭제하면 복구할 수 없어요.</span>
+            <button className={cancelBtn} onClick={handleCancel}>취소</button>
+            <button className={confirmBtn} onClick={handleConfirm}>삭제</button>
+          </div>
+        ) : (
+          <>
+            <p className={meta}>마지막: {formatDate(novel.lastReadAt)}</p>
+            <div className={barWrap}>
+              <div className={bar} style={{ width: `${pctVal}%`, background: solid }} />
+            </div>
+            <p className={pct}>{pctVal}%</p>
+          </>
+        )}
       </div>
     </div>
   )
