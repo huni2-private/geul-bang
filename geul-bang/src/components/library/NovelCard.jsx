@@ -144,6 +144,7 @@ function formatDate(ts) {
 export default function NovelCard({ novel, onDelete }) {
   const navigate = useNavigate()
   const [confirming, setConfirming] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const pctVal = Math.round((novel.progressRatio || 0) * 100)
   const { gradient, solid } = titleColors(novel.title || '')
 
@@ -157,26 +158,41 @@ export default function NovelCard({ novel, onDelete }) {
     setConfirming(false)
   }
 
-  function handleConfirm(e) {
+  async function handleConfirm(e) {
     e.stopPropagation()
-    onDelete(novel)
+    setDeleting(true)
+    try {
+      await onDelete(novel)
+    } catch {
+      setDeleting(false)
+      setConfirming(false)
+    }
   }
 
   return (
-    <div className={card} onClick={() => !confirming && navigate(`/reader/${novel.id}`)}>
+    <div className={card} onClick={() => !confirming && !deleting && navigate(`/reader/${novel.id}`)}>
       <div className={cover} style={{ background: gradient }}>
         {novel.title.charAt(0)}
       </div>
       <div className={contentWrap}>
         <div className={titleRow}>
           <span className={title}>{novel.title}</span>
-          {!confirming && (
+          {!confirming && !deleting && (
             <button className={deleteBtn} onClick={handleDeleteClick} title="삭제">
               <Trash2 size={15} />
             </button>
           )}
         </div>
-        {confirming ? (
+        {deleting ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--colors-text-muted)', fontSize: 13 }}>
+            <div style={{
+              width: 14, height: 14, borderRadius: '50%',
+              border: '2px solid currentColor', borderTopColor: 'transparent',
+              animation: 'spin 0.8s linear infinite', flexShrink: 0,
+            }} />
+            삭제 중...
+          </div>
+        ) : confirming ? (
           <div className={confirmRow}>
             <span className={confirmMsg}>삭제하면 복구할 수 없어요.</span>
             <button className={cancelBtn} onClick={handleCancel}>취소</button>

@@ -10,18 +10,26 @@ function debounce(fn, delay) {
   }
 }
 
-export function useReader(novelId, initialScroll, disabled = false) {
+export function useReader(novelId, initialProgress, disabled = false) {
   const user = useAuth()
   const initialized = useRef(false)
 
-  // 저장된 위치로 이동
+  // progressRatio 기반 스크롤 복원 — 글자 크기와 무관하게 정확한 위치로
   useEffect(() => {
-    if (disabled) return
-    if (!initialized.current && initialScroll > 0) {
-      window.scrollTo({ top: initialScroll, behavior: 'instant' })
-      initialized.current = true
-    }
-  }, [initialScroll, disabled])
+    if (disabled || initialized.current || !initialProgress) return
+    // 텍스트 렌더 완료 후 2 rAF 대기
+    let raf1, raf2
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        const max = document.body.scrollHeight - window.innerHeight
+        if (max > 0) {
+          window.scrollTo({ top: initialProgress * max, behavior: 'instant' })
+        }
+        initialized.current = true
+      })
+    })
+    return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2) }
+  }, [initialProgress, disabled])
 
   // debounce 1초로 스크롤 위치 자동 저장
   useEffect(() => {

@@ -197,6 +197,11 @@ export default function LibraryPage() {
   const { canInstall, install } = usePWAInstall()
 
   async function handleUpload(file) {
+    const MAX_MB = 30
+    if (file.size > MAX_MB * 1024 * 1024) {
+      showToast(`파일이 너무 큽니다 (${(file.size / 1024 / 1024).toFixed(1)}MB). ${MAX_MB}MB 이하 파일만 올릴 수 있어요.`, 'error', 8000)
+      return
+    }
     setUploadStep('')
     try {
       const uploaded = await uploadNovel(file, (step) => setUploadStep(step))

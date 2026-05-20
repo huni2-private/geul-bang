@@ -139,7 +139,7 @@ export default function ReaderPage() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [isPageMode])
 
-  useReader(novelId, novel?.scrollPosition ?? 0, isPageMode)
+  useReader(novelId, novel?.progressRatio ?? 0, isPageMode)
 
   const { currentPage, totalPages, colWidth, goNext, goPrev, goToPage, progressRatio, wrapperRef, columnRef } =
     usePageMode({
