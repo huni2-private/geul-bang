@@ -35,19 +35,25 @@ export function useNovels() {
     }
   }, [uid])
 
-  async function uploadNovel(file) {
+  // onStep: (msg: string) => void — 단계별 진행 상태를 UI에 전달
+  async function uploadNovel(file, onStep) {
     if (!uid || uploading) return false
     setUploading(true)
     let novelId = null
     try {
+      onStep?.('파일 읽는 중...')
       const title = getFileTitle(file.name)
       const blob = await readFileAsText(file)
       const text = await blob.text()
+
+      onStep?.('목록에 추가하는 중...')
       novelId = await createNovel(uid, { title, fileSize: file.size })
+
+      onStep?.('소설 내용 저장 중...')
       await saveChunks(uid, novelId, text)
+
       return true
     } catch (e) {
-      // 청크 저장 실패 시 생성된 빈 소설 문서를 롤백
       if (novelId) {
         try { await deleteNovel(uid, novelId) } catch {}
       }

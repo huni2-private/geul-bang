@@ -189,6 +189,7 @@ export default function LibraryPage() {
   const { novels, loading, uploading, uploadNovel, removeNovel } = useNovels()
   const showToast = useToast()
   const [showLinkModal, setShowLinkModal] = useState(false)
+  const [uploadStep, setUploadStep] = useState('')
   const [sortOrder, setSortOrder] = useState(() =>
     localStorage.getItem(SORT_KEY) || 'lastRead'
   )
@@ -196,18 +197,24 @@ export default function LibraryPage() {
   const { canInstall, install } = usePWAInstall()
 
   async function handleUpload(file) {
+    setUploadStep('')
     try {
-      const uploaded = await uploadNovel(file)
+      const uploaded = await uploadNovel(file, (step) => setUploadStep(step))
       if (uploaded) {
+        setUploadStep('')
         showToast('업로드 완료! 소설을 탭해서 읽어보세요.', 'info', 3000)
         if (user?.isAnonymous) setShowLinkModal(true)
       }
     } catch (e) {
+      setUploadStep('')
       console.error('업로드 실패:', e)
-      const msg = e?.code === 'permission-denied'
-        ? 'Firestore 권한 오류입니다. 잠시 후 다시 시도해주세요.'
+      const code = e?.code || ''
+      const msg = code.includes('permission-denied')
+        ? '저장 권한이 없습니다. 로그인 상태를 확인해주세요.'
+        : code.includes('unavailable') || code.includes('network')
+        ? '네트워크 오류입니다. 인터넷 연결을 확인해주세요.'
         : (e.message || '업로드 중 오류가 발생했습니다.')
-      showToast(msg, 'error', 6000)
+      showToast(`업로드 실패: ${msg}`, 'error', 8000)
     }
   }
 
@@ -254,7 +261,7 @@ export default function LibraryPage() {
         </div>
       )}
       <div className={inner}>
-        {/* 업로드 진행 중 카드 — 업로드 중일 때 항상 표시 */}
+        {/* 업로드 진행 중 카드 — 단계별 상태 표시 */}
         {uploading && (
           <div className={uploadingCard} style={{ marginBottom: 16 }}>
             <div style={{
@@ -266,10 +273,10 @@ export default function LibraryPage() {
             }} />
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--colors-accent)', marginBottom: 2 }}>
-                소설 업로드 중...
+                {uploadStep || '업로드 준비 중...'}
               </div>
               <div style={{ fontSize: 12, color: 'var(--colors-text-muted)' }}>
-                파일을 처리하고 있어요. 페이지를 닫지 마세요.
+                페이지를 닫지 마세요.
               </div>
             </div>
           </div>
