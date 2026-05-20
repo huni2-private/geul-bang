@@ -202,10 +202,27 @@ export default function ReaderPage() {
       <div
         className={pageWrap}
         data-theme={dataTheme}
-        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '24px' }}
       >
-        <span style={{ fontSize: '14px', color: 'var(--colors-error)' }}>소설을 불러오지 못했습니다.</span>
-        <span style={{ fontSize: '12px', opacity: 0.5 }}>{loadError}</span>
+        <div style={{ fontSize: 40 }}>⚠️</div>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: '16px', fontWeight: 600, marginBottom: 8 }}>소설을 열 수 없어요</p>
+          <p style={{ fontSize: '13px', opacity: 0.55, lineHeight: 1.6 }}>
+            네트워크 상태를 확인하고 다시 시도해보세요.
+          </p>
+        </div>
+        <button
+          onClick={() => navigate('/')}
+          style={{
+            padding: '10px 20px', borderRadius: 8,
+            border: '1px solid var(--colors-border)',
+            background: 'var(--colors-bg-card)',
+            color: 'var(--colors-text)',
+            fontSize: 14, cursor: 'pointer',
+          }}
+        >
+          서재로 돌아가기
+        </button>
       </div>
     )
   }
@@ -215,10 +232,49 @@ export default function ReaderPage() {
       <div
         className={pageWrap}
         data-theme={dataTheme}
-        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '24px' }}
       >
-        <span style={{ fontSize: '14px', opacity: 0.6 }}>내용을 찾을 수 없습니다.</span>
-        <span style={{ fontSize: '12px', opacity: 0.4 }}>소설을 삭제 후 다시 업로드해 주세요.</span>
+        <div style={{ fontSize: 40 }}>📭</div>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: '16px', fontWeight: 600, marginBottom: 8 }}>소설 내용을 불러올 수 없어요</p>
+          <p style={{ fontSize: '13px', opacity: 0.55, lineHeight: 1.6 }}>
+            업로드 중 오류가 발생한 것 같아요.<br />
+            소설을 삭제하고 다시 추가하면 해결돼요.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              padding: '10px 20px', borderRadius: 8,
+              border: '1px solid var(--colors-border)',
+              background: 'var(--colors-bg-card)',
+              color: 'var(--colors-text)',
+              fontSize: 14, cursor: 'pointer',
+            }}
+          >
+            서재로 돌아가기
+          </button>
+          {novel && (
+            <button
+              onClick={async () => {
+                const { deleteChunks, deleteNovel } = await import('../services/novel.service')
+                await deleteChunks(user.uid, novel.id)
+                await deleteNovel(user.uid, novel.id)
+                navigate('/')
+              }}
+              style={{
+                padding: '10px 20px', borderRadius: 8,
+                border: 'none',
+                background: '#ef4444',
+                color: '#fff',
+                fontSize: 14, fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              이 소설 삭제하기
+            </button>
+          )}
+        </div>
       </div>
     )
   }

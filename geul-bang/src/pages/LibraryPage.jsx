@@ -85,6 +85,18 @@ const grid = css({
   gap: '12px',
 })
 
+// ── 업로드 진행 카드 ──────────────────────────────────────────
+
+const uploadingCard = css({
+  background: 'token(colors.accent.subtle)',
+  border: '1px solid token(colors.accent.muted)',
+  borderRadius: '10px',
+  padding: '16px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '14px',
+})
+
 // ── 빈 서재 ─────────────────────────────────────────────────
 
 const emptyWrap = css({
@@ -242,6 +254,27 @@ export default function LibraryPage() {
         </div>
       )}
       <div className={inner}>
+        {/* 업로드 진행 중 카드 — 업로드 중일 때 항상 표시 */}
+        {uploading && (
+          <div className={uploadingCard} style={{ marginBottom: 16 }}>
+            <div style={{
+              width: 20, height: 20, borderRadius: '50%',
+              border: '2.5px solid var(--colors-accent-muted)',
+              borderTopColor: 'var(--colors-accent)',
+              animation: 'spin 0.8s linear infinite',
+              flexShrink: 0,
+            }} />
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--colors-accent)', marginBottom: 2 }}>
+                소설 업로드 중...
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--colors-text-muted)' }}>
+                파일을 처리하고 있어요. 페이지를 닫지 마세요.
+              </div>
+            </div>
+          </div>
+        )}
+
         {loading ? (
           // ── 스켈레톤 ──
           <div className={grid}>
@@ -257,7 +290,7 @@ export default function LibraryPage() {
             ))}
           </div>
 
-        ) : novels.length === 0 ? (
+        ) : novels.length === 0 && !uploading ? (
           // ── 빈 서재 ──
           <div className={emptyWrap}>
             <img src="/geulbang.png" className={emptyIcon} alt="글방" />
