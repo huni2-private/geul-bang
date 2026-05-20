@@ -66,5 +66,5 @@ export function useNovels() {
     await deleteNovel(uid, novel.id)
   }
 
-  return { novels, loading, uploading, dbError, uploadNovel, removeNovel }
+  return { novels, uploading, dbError, uploadNovel, removeNovel }
 }
