@@ -66,19 +66,6 @@ const inner = css({
   padding: { base: '24px 16px', sm: '32px 20px' },
 })
 
-// ── 스켈레톤 ─────────────────────────────────────────────────
-
-const skeletonCard = css({
-  background: 'token(colors.bg.card)',
-  border: '1px solid token(colors.border)',
-  borderRadius: '10px',
-  padding: '12px 16px 12px 12px',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '12px',
-  opacity: 0.5,
-})
-
 const grid = css({
   display: 'flex',
   flexDirection: 'column',
@@ -186,7 +173,7 @@ const noResult = css({
 
 export default function LibraryPage() {
   const user = useAuth()
-  const { novels, loading, uploading, dbError, uploadNovel, removeNovel } = useNovels()
+  const { novels, uploading, dbError, uploadNovel, removeNovel } = useNovels()
   const showToast = useToast()
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [uploadStep, setUploadStep] = useState('')
@@ -287,22 +274,7 @@ export default function LibraryPage() {
           </div>
         )}
 
-        {loading ? (
-          // ── 스켈레톤 ──
-          <div className={grid}>
-            {[0, 1, 2].map((i) => (
-              <div key={i} className={skeletonCard}>
-                <div style={{ width: 64, height: 80, borderRadius: 8, background: 'currentColor', opacity: 0.3 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ height: 16, borderRadius: 4, background: 'currentColor', opacity: 0.3, marginBottom: 8, width: '60%' }} />
-                  <div style={{ height: 12, borderRadius: 4, background: 'currentColor', opacity: 0.3, marginBottom: 10, width: '40%' }} />
-                  <div style={{ height: 6, borderRadius: 99, background: 'currentColor', opacity: 0.3 }} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-        ) : dbError ? (
+        {dbError ? (
           // ── DB 연결 오류 ──
           <div className={emptyWrap}>
             <div style={{ fontSize: 40 }}>⚠️</div>

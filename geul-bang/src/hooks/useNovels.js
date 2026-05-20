@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { subscribeNovels, createNovel, saveChunks, deleteChunks, deleteNovel } from '../services/novel.service'
 import { readFileAsText, getFileTitle } from '../utils/fileReader'
 import { useAuth } from '../contexts/AuthContext'
@@ -11,8 +11,7 @@ export function useNovels() {
   const user = useAuth()
   const uid = user?.uid
   const showToast = useToast()
-  const [novels, setNovels] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [novels, setNovels] = useState(() => novelsCache[null] ?? [])
   const [uploading, setUploading] = useState(false)
   const [dbError, setDbError] = useState(null)
 
@@ -21,25 +20,16 @@ export function useNovels() {
     setDbError(null)
     if (novelsCache[uid] !== undefined) {
       setNovels(novelsCache[uid])
-      setLoading(false)
-    } else {
-      setLoading(true)
     }
-    const timeout = setTimeout(() => setLoading(false), 5000)
     const unsubscribe = subscribeNovels(uid, (data, error) => {
-      clearTimeout(timeout)
       if (error) {
         setDbError(error)
         showToast?.(`데이터베이스 연결 오류: ${error.code || error.message}`, 'error', 10000)
       }
       novelsCache[uid] = data
       setNovels(data)
-      setLoading(false)
     })
-    return () => {
-      clearTimeout(timeout)
-      unsubscribe()
-    }
+    return unsubscribe
   }, [uid, showToast])
 
   // onStep: (msg: string) => void — 단계별 진행 상태를 UI에 전달
