@@ -2,6 +2,7 @@ import {
   collection,
   doc,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   getDocs,
@@ -53,18 +54,17 @@ export async function createNovel(uid, { title, fileSize }) {
 }
 
 export async function saveChunks(uid, novelId, text) {
-  const batch = writeBatch(db)
   const ref = chunksRef(uid, novelId)
+  const writes = []
   let count = 0
   for (let i = 0; i * CHUNK_SIZE < text.length; i++) {
     const id = String(i).padStart(8, '0')
     const chunk = text.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)
-    batch.set(doc(ref, id), { text: chunk })
+    writes.push(setDoc(doc(ref, id), { text: chunk }))
     count++
   }
-  console.log(`[saveChunks] 텍스트 길이=${text.length}, 청크 수=${count}, novelId=${novelId}`)
-  await batch.commit()
-  console.log('[saveChunks] 저장 완료')
+  // 병렬 저장 — writeBatch.commit()의 무한대기 문제 회피
+  await Promise.all(writes)
   return count
 }
 
