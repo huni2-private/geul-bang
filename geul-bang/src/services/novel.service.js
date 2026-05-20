@@ -2,6 +2,7 @@ import {
   collection,
   doc,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   getDocs,
@@ -52,18 +53,17 @@ export async function createNovel(uid, { title, fileSize }) {
   return ref.id
 }
 
-export async function saveChunks(uid, novelId, text) {
+// 순차 저장 — 대용량 파일도 안전하게 청크별 개별 요청
+export async function saveChunks(uid, novelId, text, onProgress) {
   const ref = chunksRef(uid, novelId)
-  const batch = writeBatch(db)
-  let count = 0
+  const total = Math.max(1, Math.ceil(text.length / CHUNK_SIZE))
   for (let i = 0; i * CHUNK_SIZE < text.length; i++) {
     const id = String(i).padStart(8, '0')
     const chunk = text.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)
-    batch.set(doc(ref, id), { text: chunk })
-    count++
+    await setDoc(doc(ref, id), { text: chunk })
+    onProgress?.(Math.round(((i + 1) / total) * 100))
   }
-  if (count > 0) await batch.commit()
-  return count
+  return total
 }
 
 export async function getChunks(uid, novelId) {

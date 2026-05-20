@@ -46,8 +46,8 @@ export function useNovels() {
       onStep?.('목록에 추가하는 중...')
       novelId = await createNovel(uid, { title, fileSize: file.size })
 
-      onStep?.('소설 내용 저장 중...')
-      await saveChunks(uid, novelId, text)
+      onStep?.('소설 내용 저장 중... (0%)')
+      await saveChunks(uid, novelId, text, (pct) => onStep?.(`소설 내용 저장 중... (${pct}%)`))
 
       return true
     } catch (e) {
