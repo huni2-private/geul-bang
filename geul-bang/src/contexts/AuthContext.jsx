@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { subscribeAuth, loginAnonymously } from '../services/auth.service'
+import { useToast } from './ToastContext'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(undefined)
+  const showToast = useToast()
 
   useEffect(() => {
     const unsubscribe = subscribeAuth(async (firebaseUser) => {
@@ -16,12 +18,12 @@ export function AuthProvider({ children }) {
           setUser(newUser)
         } catch (e) {
           console.error('익명 로그인 실패:', e)
-          alert('서비스에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.')
+          showToast('서비스에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.', 'error', 5000)
         }
       }
     })
     return unsubscribe
-  }, [])
+  }, [showToast])
 
   return <AuthContext.Provider value={user}>{children}</AuthContext.Provider>
 }

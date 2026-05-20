@@ -6,11 +6,8 @@ import {
   deleteDoc,
   getDocs,
   onSnapshot,
-  query,
-  orderBy,
   writeBatch,
   serverTimestamp,
-  // orderBy는 subscribeNovels에서만 사용
 } from 'firebase/firestore'
 import { db } from './firebase'
 
@@ -29,9 +26,9 @@ function chunksRef(uid, novelId) {
 }
 
 export function subscribeNovels(uid, callback) {
-  const q = query(novelsRef(uid), orderBy('lastReadAt', 'desc'))
+  // orderBy를 제거해 Firestore 인덱스 의존 없이 동작 — 정렬은 LibraryPage에서 처리
   return onSnapshot(
-    q,
+    novelsRef(uid),
     (snap) => {
       const novels = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
       callback(novels)

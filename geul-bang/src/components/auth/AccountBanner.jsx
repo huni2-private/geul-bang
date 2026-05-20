@@ -1,5 +1,6 @@
 import { css } from 'styled-system/css'
 import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../../contexts/ToastContext'
 import { linkGoogle } from '../../services/auth.service'
 
 const banner = css({
@@ -29,6 +30,7 @@ const btn = css({
 
 export default function AccountBanner() {
   const user = useAuth()
+  const showToast = useToast()
   if (!user || !user.isAnonymous) return null
 
   async function handleLink() {
@@ -39,7 +41,7 @@ export default function AccountBanner() {
         return
       }
       if (e.code === 'auth/credential-already-in-use') {
-        alert('이미 다른 계정에 연동된 Google 계정입니다.')
+        showToast('이미 다른 계정에 연동된 Google 계정입니다.', 'warn')
         return
       }
       console.error('계정 연동 실패:', e)

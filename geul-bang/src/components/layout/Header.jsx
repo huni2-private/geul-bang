@@ -4,6 +4,7 @@ import { css } from 'styled-system/css'
 import { Menu, LogOut, Link2, LogIn } from 'lucide-react'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
 import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../../contexts/ToastContext'
 import { logOut, linkGoogle, loginWithGoogle } from '../../services/auth.service'
 import NavDrawer from './NavDrawer'
 
@@ -172,10 +173,11 @@ export default function Header({ children }) {
   const isHidden = useScrollDirection()
   const [menuOpen, setMenuOpen] = useState(false)
   const [dropOpen, setDropOpen] = useState(false)
+  const [logoutConfirm, setLogoutConfirm] = useState(false)
   const user = useAuth()
+  const showToast = useToast()
 
   async function handleLogout() {
-    if (!confirm('로그아웃하면 익명 계정으로 전환됩니다. 계속하시겠어요?')) return
     setDropOpen(false)
     await logOut()
   }
@@ -197,7 +199,7 @@ export default function Header({ children }) {
     } catch (e) {
       if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return
       if (e.code === 'auth/credential-already-in-use') {
-        alert('이미 연동된 계정입니다. 아래 "로그인" 버튼을 사용해주세요.')
+        showToast('이미 연동된 계정입니다. 로그인 버튼을 사용해주세요.', 'warn')
         return
       }
       console.error('계정 연동 실패:', e)
@@ -265,10 +267,28 @@ export default function Header({ children }) {
                 <p className={dropName}>{user?.displayName || '사용자'}</p>
                 <p className={dropEmail}>{user?.email}</p>
                 <div className={dropDivider} />
-                <button className={`${dropAction} ${dropLogout}`} onClick={handleLogout}>
-                  <LogOut size={14} />
-                  로그아웃
-                </button>
+                {logoutConfirm ? (
+                  <>
+                    <p style={{ fontSize: '12px', color: 'var(--colors-text-muted)', marginBottom: '8px', lineHeight: 1.5 }}>
+                      익명 계정으로 전환됩니다.<br />계속하시겠어요?
+                    </p>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        style={{ flex: 1, padding: '6px', fontSize: '12px', borderRadius: '6px', border: '1px solid var(--colors-border)', background: 'var(--colors-bg-card)', color: 'var(--colors-text-muted)', cursor: 'pointer' }}
+                        onClick={() => setLogoutConfirm(false)}
+                      >취소</button>
+                      <button
+                        style={{ flex: 1, padding: '6px', fontSize: '12px', borderRadius: '6px', border: 'none', background: '#ef4444', color: '#fff', fontWeight: '600', cursor: 'pointer' }}
+                        onClick={handleLogout}
+                      >로그아웃</button>
+                    </div>
+                  </>
+                ) : (
+                  <button className={`${dropAction} ${dropLogout}`} onClick={() => setLogoutConfirm(true)}>
+                    <LogOut size={14} />
+                    로그아웃
+                  </button>
+                )}
               </>
             )}
           </div>

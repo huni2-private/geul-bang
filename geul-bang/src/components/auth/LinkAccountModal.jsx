@@ -2,6 +2,7 @@
 import { css } from 'styled-system/css'
 import { X } from 'lucide-react'
 import { linkGoogle } from '../../services/auth.service'
+import { useToast } from '../../contexts/ToastContext'
 
 const overlay = css({
   position: 'fixed',
@@ -89,6 +90,8 @@ const skipBtn = css({
 })
 
 export default function LinkAccountModal({ onClose }) {
+  const showToast = useToast()
+
   async function handleLink() {
     try {
       await linkGoogle()
@@ -96,7 +99,7 @@ export default function LinkAccountModal({ onClose }) {
     } catch (e) {
       if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return
       if (e.code === 'auth/credential-already-in-use') {
-        alert('이미 다른 계정에 연동된 Google 계정입니다.')
+        showToast('이미 다른 계정에 연동된 Google 계정입니다.', 'warn')
         return
       }
       console.error('계정 연동 실패:', e)
