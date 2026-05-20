@@ -2,7 +2,6 @@ import {
   collection,
   doc,
   addDoc,
-  setDoc,
   updateDoc,
   deleteDoc,
   getDocs,
@@ -55,16 +54,15 @@ export async function createNovel(uid, { title, fileSize }) {
 
 export async function saveChunks(uid, novelId, text) {
   const ref = chunksRef(uid, novelId)
-  const writes = []
+  const batch = writeBatch(db)
   let count = 0
   for (let i = 0; i * CHUNK_SIZE < text.length; i++) {
     const id = String(i).padStart(8, '0')
     const chunk = text.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)
-    writes.push(setDoc(doc(ref, id), { text: chunk }))
+    batch.set(doc(ref, id), { text: chunk })
     count++
   }
-  // 병렬 저장 — writeBatch.commit()의 무한대기 문제 회피
-  await Promise.all(writes)
+  if (count > 0) await batch.commit()
   return count
 }
 
