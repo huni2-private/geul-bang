@@ -53,15 +53,20 @@ export async function createNovel(uid, { title, fileSize }) {
   return ref.id
 }
 
-// 순차 저장 — 대용량 파일도 안전하게 청크별 개별 요청
+// 5개씩 병렬 저장 — write stream 한도(동시) 지키면서 순차보다 5배 빠름
 export async function saveChunks(uid, novelId, text, onProgress) {
   const ref = chunksRef(uid, novelId)
-  const total = Math.max(1, Math.ceil(text.length / CHUNK_SIZE))
+  const chunks = []
   for (let i = 0; i * CHUNK_SIZE < text.length; i++) {
-    const id = String(i).padStart(8, '0')
-    const chunk = text.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)
-    await setDoc(doc(ref, id), { text: chunk })
-    onProgress?.(Math.round(((i + 1) / total) * 100))
+    chunks.push({ id: String(i).padStart(8, '0'), text: text.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE) })
+  }
+  const total = chunks.length || 1
+  const BATCH = 5
+  for (let i = 0; i < total; i += BATCH) {
+    await Promise.all(
+      chunks.slice(i, i + BATCH).map(({ id, text: chunk }) => setDoc(doc(ref, id), { text: chunk }))
+    )
+    onProgress?.(Math.round(Math.min((i + BATCH) / total * 100, 100)))
   }
   return total
 }

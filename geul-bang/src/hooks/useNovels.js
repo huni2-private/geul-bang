@@ -38,12 +38,13 @@ export function useNovels() {
     setUploading(true)
     let novelId = null
     try {
-      onStep?.('파일 읽는 중...')
+      const sizeMB = (file.size / 1024 / 1024).toFixed(1)
+      onStep?.(`파일 읽는 중... (${sizeMB}MB)`)
       const title = getFileTitle(file.name)
       const blob = await readFileAsText(file)
       const text = await blob.text()
 
-      onStep?.('목록에 추가하는 중...')
+      onStep?.('Firestore 연결 중...')
       novelId = await createNovel(uid, { title, fileSize: file.size })
 
       onStep?.('소설 내용 저장 중... (0%)')
