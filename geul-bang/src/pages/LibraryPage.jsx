@@ -185,8 +185,8 @@ export default function LibraryPage() {
   async function handleUpload(file) {
     setUploadError(null)
     try {
-      await uploadNovel(file)
-      if (user?.isAnonymous) setShowLinkModal(true)
+      const uploaded = await uploadNovel(file)
+      if (uploaded && user?.isAnonymous) setShowLinkModal(true)
     } catch (e) {
       console.error('업로드 실패:', e)
       setUploadError(e.message || '업로드 중 오류가 발생했습니다.')
