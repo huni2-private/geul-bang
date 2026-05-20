@@ -9,6 +9,7 @@ import FileUploader from '../components/library/FileUploader'
 import LinkAccountModal from '../components/auth/LinkAccountModal'
 import { useNovels } from '../hooks/useNovels'
 import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
 import { usePWAInstall } from '../hooks/usePWAInstall'
 
 const SORT_KEY = 'geulbang_sort'
@@ -174,22 +175,27 @@ const noResult = css({
 export default function LibraryPage() {
   const user = useAuth()
   const { novels, loading, uploading, uploadNovel, removeNovel } = useNovels()
+  const showToast = useToast()
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [sortOrder, setSortOrder] = useState(() =>
     localStorage.getItem(SORT_KEY) || 'lastRead'
   )
   const [searchQuery, setSearchQuery] = useState('')
-  const [uploadError, setUploadError] = useState(null)
   const { canInstall, install } = usePWAInstall()
 
   async function handleUpload(file) {
-    setUploadError(null)
     try {
       const uploaded = await uploadNovel(file)
-      if (uploaded && user?.isAnonymous) setShowLinkModal(true)
+      if (uploaded) {
+        showToast('업로드 완료! 소설을 탭해서 읽어보세요.', 'info', 3000)
+        if (user?.isAnonymous) setShowLinkModal(true)
+      }
     } catch (e) {
       console.error('업로드 실패:', e)
-      setUploadError(e.message || '업로드 중 오류가 발생했습니다.')
+      const msg = e?.code === 'permission-denied'
+        ? 'Firestore 권한 오류입니다. 잠시 후 다시 시도해주세요.'
+        : (e.message || '업로드 중 오류가 발생했습니다.')
+      showToast(msg, 'error', 6000)
     }
   }
 
@@ -236,12 +242,6 @@ export default function LibraryPage() {
         </div>
       )}
       <div className={inner}>
-        {uploadError && (
-          <div style={{ padding: '10px 14px', marginBottom: '12px', borderRadius: '8px', background: 'var(--colors-error-subtle)', color: 'var(--colors-error)', fontSize: '13px' }}>
-            업로드 실패: {uploadError}
-          </div>
-        )}
-
         {loading ? (
           // ── 스켈레톤 ──
           <div className={grid}>
@@ -297,7 +297,17 @@ export default function LibraryPage() {
             ) : (
               <div className={grid}>
                 {displayedNovels.map((novel) => (
-                  <NovelCard key={novel.id} novel={novel} onDelete={removeNovel} />
+                  <NovelCard
+                    key={novel.id}
+                    novel={novel}
+                    onDelete={async (n) => {
+                      try {
+                        await removeNovel(n)
+                      } catch {
+                        showToast('삭제 중 오류가 발생했습니다. 다시 시도해주세요.', 'error')
+                      }
+                    }}
+                  />
                 ))}
               </div>
             )}
