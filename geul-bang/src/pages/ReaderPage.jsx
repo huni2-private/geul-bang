@@ -96,22 +96,39 @@ export default function ReaderPage() {
 
   useEffect(() => {
     if (!user || !novelId) return
+    let cancelled = false
     async function load() {
-      try {
-        const snap = await getDoc(doc(db, 'users', user.uid, 'novels', novelId))
-        if (!snap.exists()) { navigate('/'); return }
-        const data = { id: snap.id, ...snap.data() }
-        setNovel(data)
-        const txt = await getChunks(user.uid, novelId)
-        setText(txt)
-      } catch (e) {
-        console.error('소설 불러오기 실패:', e)
-        setLoadError(e.message || '불러오기 실패')
-      } finally {
-        setLoading(false)
+      const MAX_RETRIES = 2
+      let lastError = null
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        if (attempt > 0) {
+          await new Promise(r => setTimeout(r, 1500 * attempt))
+          if (cancelled) return
+        }
+        try {
+          const snap = await getDoc(doc(db, 'users', user.uid, 'novels', novelId))
+          if (cancelled) return
+          if (!snap.exists()) { navigate('/'); return }
+          const data = { id: snap.id, ...snap.data() }
+          setNovel(data)
+          const txt = await getChunks(user.uid, novelId)
+          if (cancelled) return
+          setText(txt)
+          setLoading(false)
+          return
+        } catch (e) {
+          if (cancelled) return
+          lastError = e
+          // Firestore 초기 연결 중 일시적 offline — 재시도
+          if (!e.message?.includes('offline')) break
+        }
       }
+      console.error('소설 불러오기 실패:', lastError)
+      setLoadError(lastError?.message || '불러오기 실패')
+      setLoading(false)
     }
     load()
+    return () => { cancelled = true }
   }, [user, novelId, navigate])
 
   const isPageMode = settings.mode === 'page'

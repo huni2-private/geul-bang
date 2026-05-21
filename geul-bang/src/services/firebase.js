@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { initializeFirestore, memoryLocalCache } from 'firebase/firestore'
+import { initializeFirestore, persistentLocalCache } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
@@ -15,6 +15,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 
 export const auth = getAuth(app)
-// 오프라인 캐시 비활성화 — 서버 연결 불가 시 무한 대기 대신 즉시 에러
-export const db = initializeFirestore(app, { localCache: memoryLocalCache() })
+// IndexedDB 캐시 사용 — 연결 중 순간에도 이전 데이터 즉시 반환
+export const db = initializeFirestore(app, { localCache: persistentLocalCache() })
 export const storage = getStorage(app)
