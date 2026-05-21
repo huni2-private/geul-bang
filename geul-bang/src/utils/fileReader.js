@@ -1,9 +1,8 @@
-// 파일 포맷별 텍스트 추출 — txt / pdf / docx 지원
+// 파일 포맷별 텍스트 추출 — txt / pdf / docx 지원, 항상 string 반환
 import { readFileAsUTF8 } from './encoding'
 
 async function readPdf(file) {
   const pdfjsLib = await import('pdfjs-dist')
-  // 워커를 unpkg CDN으로 지정해 번들 크기 절약
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
   const buffer = await file.arrayBuffer()
@@ -14,14 +13,14 @@ async function readPdf(file) {
     const content = await page.getTextContent()
     pages.push(content.items.map((item) => item.str).join(''))
   }
-  return new Blob([pages.join('\n\n')], { type: 'text/plain;charset=utf-8' })
+  return pages.join('\n\n')
 }
 
 async function readDocx(file) {
   const { default: mammoth } = await import('mammoth')
   const buffer = await file.arrayBuffer()
   const result = await mammoth.extractRawText({ arrayBuffer: buffer })
-  return new Blob([result.value], { type: 'text/plain;charset=utf-8' })
+  return result.value
 }
 
 export function getFileTitle(filename) {

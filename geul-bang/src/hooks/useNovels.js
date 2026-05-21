@@ -41,8 +41,7 @@ export function useNovels() {
       const sizeMB = (file.size / 1024 / 1024).toFixed(1)
       onStep?.(`파일 읽는 중... (${sizeMB}MB)`)
       const title = getFileTitle(file.name)
-      const blob = await readFileAsText(file)
-      const text = await blob.text()
+      const text = await readFileAsText(file)
 
       onStep?.('Firestore 연결 중...')
       novelId = await createNovel(uid, { title, fileSize: file.size })

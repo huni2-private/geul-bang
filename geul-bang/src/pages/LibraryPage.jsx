@@ -1,7 +1,7 @@
 // 서재 페이지 — 소설 목록, 검색/정렬, 스켈레톤 로딩
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { css } from 'styled-system/css'
-import { Search } from 'lucide-react'
+import { Search, Upload } from 'lucide-react'
 import Header from '../components/layout/Header'
 import AccountBanner from '../components/auth/AccountBanner'
 import NovelCard from '../components/library/NovelCard'
@@ -182,6 +182,8 @@ export default function LibraryPage() {
   )
   const [searchQuery, setSearchQuery] = useState('')
   const { canInstall, install } = usePWAInstall()
+  const [isDragging, setIsDragging] = useState(false)
+  const dragCounter = useRef(0)
 
   async function handleUpload(file) {
     const MAX_MB = 30
@@ -208,6 +210,31 @@ export default function LibraryPage() {
         : (e.message || '업로드 중 오류가 발생했습니다.')
       showToast(`업로드 실패: ${msg}`, 'error', 8000)
     }
+  }
+
+  function handleDragEnter(e) {
+    e.preventDefault()
+    dragCounter.current++
+    if (!uploading) setIsDragging(true)
+  }
+
+  function handleDragLeave(e) {
+    e.preventDefault()
+    dragCounter.current--
+    if (dragCounter.current === 0) setIsDragging(false)
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault()
+  }
+
+  function handleDrop(e) {
+    e.preventDefault()
+    dragCounter.current = 0
+    setIsDragging(false)
+    if (uploading) return
+    const file = e.dataTransfer.files?.[0]
+    if (file) handleUpload(file)
   }
 
   function handleSortChange(value) {
@@ -241,8 +268,37 @@ export default function LibraryPage() {
     )
   }
 
+  const uploadPct = (() => {
+    const m = uploadStep.match(/\((\d+)%\)/)
+    return m ? parseInt(m[1]) : null
+  })()
+
   return (
-    <div className={wrap}>
+    <div
+      className={wrap}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {isDragging && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1000,
+          background: 'rgba(0,0,0,0.08)',
+          border: '3px dashed var(--colors-accent)',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          gap: 16, pointerEvents: 'none',
+        }}>
+          <Upload size={48} style={{ color: 'var(--colors-accent)' }} />
+          <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--colors-accent)', margin: 0 }}>
+            파일을 놓으세요
+          </p>
+          <p style={{ fontSize: 14, color: 'var(--colors-text-muted)', margin: 0 }}>
+            .txt · .pdf · .docx 지원
+          </p>
+        </div>
+      )}
       {showLinkModal && <LinkAccountModal onClose={() => setShowLinkModal(false)} />}
       <Header />
       <AccountBanner />
@@ -253,23 +309,36 @@ export default function LibraryPage() {
         </div>
       )}
       <div className={inner}>
-        {/* 업로드 진행 중 카드 — 단계별 상태 표시 */}
+        {/* 업로드 진행 카드 */}
         {uploading && (
           <div className={uploadingCard} style={{ marginBottom: 16 }}>
-            <div style={{
-              width: 20, height: 20, borderRadius: '50%',
-              border: '2.5px solid var(--colors-accent-muted)',
-              borderTopColor: 'var(--colors-accent)',
-              animation: 'spin 0.8s linear infinite',
-              flexShrink: 0,
-            }} />
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--colors-accent)', marginBottom: 2 }}>
-                {uploadStep || '업로드 준비 중...'}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <div style={{
+                  width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
+                  border: '2px solid var(--colors-accent-muted)',
+                  borderTopColor: 'var(--colors-accent)',
+                  animation: 'spin 0.8s linear infinite',
+                }} />
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--colors-accent)' }}>
+                  {uploadStep || '업로드 준비 중...'}
+                </span>
               </div>
-              <div style={{ fontSize: 12, color: 'var(--colors-text-muted)' }}>
+              <div style={{
+                height: 6, borderRadius: 99,
+                background: 'var(--colors-border)', overflow: 'hidden',
+              }}>
+                <div style={{
+                  height: '100%', borderRadius: 99,
+                  background: 'var(--colors-accent)',
+                  transition: uploadPct !== null ? 'width 0.4s ease' : 'none',
+                  width: uploadPct !== null ? `${uploadPct}%` : '35%',
+                  animation: uploadPct === null ? 'progressScan 1.4s ease infinite' : 'none',
+                }} />
+              </div>
+              <p style={{ fontSize: 11, color: 'var(--colors-text-muted)', marginTop: 4 }}>
                 페이지를 닫지 마세요.
-              </div>
+              </p>
             </div>
           </div>
         )}

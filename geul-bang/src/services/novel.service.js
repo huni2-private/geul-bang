@@ -58,6 +58,19 @@ export async function markChunksReady(uid, novelId) {
   await updateDoc(novelDoc(uid, novelId), { chunksReady: true })
 }
 
+// 네트워크 순단 대비 청크 단위 재시도
+async function writeChunk(ref, id, chunk, retries = 3) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      await setDoc(doc(ref, id), { text: chunk })
+      return
+    } catch (e) {
+      if (attempt === retries) throw e
+      await new Promise(r => setTimeout(r, 600 * (attempt + 1)))
+    }
+  }
+}
+
 // 5개씩 병렬 저장 — write stream 한도(동시) 지키면서 순차보다 5배 빠름
 export async function saveChunks(uid, novelId, text, onProgress) {
   const ref = chunksRef(uid, novelId)
@@ -69,7 +82,7 @@ export async function saveChunks(uid, novelId, text, onProgress) {
   const BATCH = 5
   for (let i = 0; i < total; i += BATCH) {
     await Promise.all(
-      chunks.slice(i, i + BATCH).map(({ id, text: chunk }) => setDoc(doc(ref, id), { text: chunk }))
+      chunks.slice(i, i + BATCH).map(({ id, text: chunk }) => writeChunk(ref, id, chunk))
     )
     onProgress?.(Math.round(Math.min((i + BATCH) / total * 100, 100)))
   }
