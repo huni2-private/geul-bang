@@ -97,3 +97,31 @@ export async function updateProgress(uid, novelId, { scrollPosition, progressRat
 export async function deleteNovel(uid, novelId) {
   await deleteDoc(novelDoc(uid, novelId))
 }
+
+// ── 북마크 ──────────────────────────────────────────────────────────────────
+
+function bookmarksRef(uid, novelId) {
+  return collection(db, 'users', uid, 'novels', novelId, 'bookmarks')
+}
+
+export function subscribeBookmarks(uid, novelId, callback) {
+  return onSnapshot(bookmarksRef(uid, novelId), (snap) => {
+    const list = snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => a.charOffset - b.charOffset)
+    callback(list)
+  })
+}
+
+export async function addBookmark(uid, novelId, { label, charOffset }) {
+  const ref = await addDoc(bookmarksRef(uid, novelId), {
+    label,
+    charOffset,
+    createdAt: serverTimestamp(),
+  })
+  return ref.id
+}
+
+export async function deleteBookmark(uid, novelId, bookmarkId) {
+  await deleteDoc(doc(bookmarksRef(uid, novelId), bookmarkId))
+}

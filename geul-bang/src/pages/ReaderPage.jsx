@@ -293,6 +293,9 @@ export default function ReaderPage() {
           chapters={chapters}
           currentCharOffset={Math.round((isPageMode ? progressRatio : scrollPct) * (text.length || 0))}
           onJump={handleChapterJump}
+          text={text}
+          novelId={novelId}
+          uid={user?.uid}
         />
         <ReaderSettings settings={settings} onChange={handleSettingsChange} />
       </Header>
