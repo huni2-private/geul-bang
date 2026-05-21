@@ -47,10 +47,15 @@ export async function createNovel(uid, { title, fileSize }) {
     fileSize,
     progressRatio: 0,
     scrollPosition: 0,
+    chunksReady: false,
     createdAt: now,
     lastReadAt: now,
   })
   return ref.id
+}
+
+export async function markChunksReady(uid, novelId) {
+  await updateDoc(novelDoc(uid, novelId), { chunksReady: true })
 }
 
 // 5개씩 병렬 저장 — write stream 한도(동시) 지키면서 순차보다 5배 빠름

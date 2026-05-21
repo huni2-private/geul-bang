@@ -147,6 +147,7 @@ export default function NovelCard({ novel, onDelete }) {
   const [deleting, setDeleting] = useState(false)
   const pctVal = Math.round((novel.progressRatio || 0) * 100)
   const { gradient, solid } = titleColors(novel.title || '')
+  const isUploading = novel.chunksReady === false
 
   function handleDeleteClick(e) {
     e.stopPropagation()
@@ -170,20 +171,33 @@ export default function NovelCard({ novel, onDelete }) {
   }
 
   return (
-    <div className={card} onClick={() => !confirming && !deleting && navigate(`/reader/${novel.id}`)}>
+    <div
+      className={card}
+      onClick={() => !confirming && !deleting && !isUploading && navigate(`/reader/${novel.id}`)}
+      style={isUploading ? { cursor: 'default', opacity: 0.75 } : undefined}
+    >
       <div className={cover} style={{ background: gradient }}>
         {novel.title.charAt(0)}
       </div>
       <div className={contentWrap}>
         <div className={titleRow}>
           <span className={title}>{novel.title}</span>
-          {!confirming && !deleting && (
+          {!confirming && !deleting && !isUploading && (
             <button className={deleteBtn} onClick={handleDeleteClick} title="삭제">
               <Trash2 size={15} />
             </button>
           )}
         </div>
-        {deleting ? (
+        {isUploading ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--colors-text-muted)', fontSize: 13 }}>
+            <div style={{
+              width: 14, height: 14, borderRadius: '50%',
+              border: '2px solid currentColor', borderTopColor: 'transparent',
+              animation: 'spin 0.8s linear infinite', flexShrink: 0,
+            }} />
+            소설 내용 저장 중...
+          </div>
+        ) : deleting ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--colors-text-muted)', fontSize: 13 }}>
             <div style={{
               width: 14, height: 14, borderRadius: '50%',

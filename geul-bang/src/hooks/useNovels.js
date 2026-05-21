@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { subscribeNovels, createNovel, saveChunks, deleteChunks, deleteNovel } from '../services/novel.service'
+import { subscribeNovels, createNovel, saveChunks, markChunksReady, deleteChunks, deleteNovel } from '../services/novel.service'
 import { readFileAsText, getFileTitle } from '../utils/fileReader'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
@@ -49,6 +49,7 @@ export function useNovels() {
 
       onStep?.('소설 내용 저장 중... (0%)')
       await saveChunks(uid, novelId, text, (pct) => onStep?.(`소설 내용 저장 중... (${pct}%)`))
+      await markChunksReady(uid, novelId)
 
       return true
     } catch (e) {
