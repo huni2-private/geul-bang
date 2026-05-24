@@ -15,6 +15,17 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: '/index.html',
         cleanupOutdatedCaches: true,
+        // Firebase/Google API 요청은 서비스 워커 캐시 완전 우회
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/[^/]*\.googleapis\.com\//,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /^https:\/\/[^/]*\.firebaseio\.com\//,
+            handler: 'NetworkOnly',
+          },
+        ],
       },
     }),
   ],

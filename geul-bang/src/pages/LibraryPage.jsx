@@ -260,10 +260,29 @@ export default function LibraryPage() {
     return q ? list.filter((n) => n.title.toLowerCase().includes(q)) : list
   }, [novels, sortOrder, searchQuery])
 
-  if (!user) {
+  if (user === undefined) {
     return (
       <div className={css({ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100svh' })}>
         <span className={css({ color: 'token(colors.text.muted)', fontSize: '14px' })}>불러오는 중...</span>
+      </div>
+    )
+  }
+
+  if (user === null) {
+    return (
+      <div className={css({ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100svh', gap: '16px', padding: '24px' })}>
+        <div style={{ fontSize: 40 }}>⚠️</div>
+        <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--colors-text)', margin: 0 }}>서비스에 연결할 수 없어요</p>
+        <p style={{ fontSize: 13, color: 'var(--colors-text-muted)', margin: 0, textAlign: 'center', lineHeight: 1.7 }}>
+          인터넷 연결을 확인하고 다시 시도해보세요.<br />
+          문제가 계속되면 Firebase 익명 로그인이<br />비활성화 상태일 수 있습니다.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          style={{ padding: '10px 24px', borderRadius: 8, background: 'var(--colors-accent)', color: '#fff', border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+        >
+          다시 시도
+        </button>
       </div>
     )
   }

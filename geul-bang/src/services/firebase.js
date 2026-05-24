@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { initializeFirestore, persistentLocalCache } from 'firebase/firestore'
+import { initializeFirestore, persistentLocalCache, memoryLocalCache } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
@@ -15,6 +15,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 
 export const auth = getAuth(app)
-// IndexedDB 캐시 사용 — 연결 중 순간에도 이전 데이터 즉시 반환
-export const db = initializeFirestore(app, { localCache: persistentLocalCache() })
+
+// IndexedDB 불가 환경(인코그니토, iOS 제한 등)에서는 메모리 캐시로 폴백
+function makeCache() {
+  try {
+    return persistentLocalCache()
+  } catch {
+    return memoryLocalCache()
+  }
+}
+export const db = initializeFirestore(app, { localCache: makeCache() })
+
 export const storage = getStorage(app)
